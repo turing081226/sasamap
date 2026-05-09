@@ -30,7 +30,7 @@ export default function FindRoom() {
         </div>
       </div>
 
-      <div style={{display: 'flex', gap: '2rem', marginTop: '2rem'}}>
+      <div className="responsive-flex">
         {/* Map Area Mockup */}
         <div className="card" style={{flex: 2, minHeight: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9'}}>
           <Map size={48} color="var(--text-muted)" style={{marginBottom: '1rem'}} />

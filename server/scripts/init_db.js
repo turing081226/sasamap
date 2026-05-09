@@ -49,7 +49,7 @@ async function initDB() {
       CREATE TABLE IF NOT EXISTS timetables (
         id INT AUTO_INCREMENT PRIMARY KEY,
         teacher_id INT,
-        teacher_name VARCHAR(100) NOT NULL,
+        teacher_name VARCHAR(100),
         subject VARCHAR(100) NOT NULL,
         room_id INT,
         day_of_week INT NOT NULL COMMENT '1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri',
