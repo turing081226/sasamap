@@ -56,9 +56,11 @@ export default function TimetableManager() {
           body: JSON.stringify(form),
         });
         if (!res.ok) throw new Error();
+        await fetchData(); // Reload to get joined room_name
+      } else {
+        const newItem = { ...form, id: Date.now(), room_name: form.room_id || '-' };
+        setItems(prev => [...prev, newItem]);
       }
-      const newItem = { ...form, id: Date.now(), room_name: form.room_id || '-' };
-      setItems(prev => [...prev, newItem]);
       setForm({ ...emptyForm });
       setShowAdd(false);
       showToast('✅ 수업이 추가되었습니다.');
@@ -78,8 +80,10 @@ export default function TimetableManager() {
           body: JSON.stringify(form),
         });
         if (!res.ok) throw new Error();
+        await fetchData(); // Reload to get correct room_name
+      } else {
+        setItems(prev => prev.map(i => i.id === editingId ? { ...i, ...form, room_name: form.room_id || i.room_name } : i));
       }
-      setItems(prev => prev.map(i => i.id === editingId ? { ...i, ...form, room_name: form.room_id || i.room_name } : i));
       setEditingId(null);
       setForm({ ...emptyForm });
       showToast('✅ 수업이 수정되었습니다.');
@@ -150,7 +154,7 @@ export default function TimetableManager() {
 
   const inputSt = { padding: '0.5rem 0.7rem', borderRadius: '7px', border: '1.5px solid #e2e8f0', fontSize: '0.85rem', outline: 'none', width: '100%' };
 
-  const FormRow = ({ onSave, onCancel, saveLabel }) => (
+  const renderFormRow = (onSave, onCancel, saveLabel) => (
     <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', marginBottom: '1rem', border: '1px solid #e2e8f0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
         <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>교사명 *</label>
@@ -222,7 +226,7 @@ export default function TimetableManager() {
       </div>
 
       {/* Add form */}
-      {showAdd && <FormRow onSave={handleAdd} onCancel={() => setShowAdd(false)} saveLabel="추가" />}
+      {showAdd && renderFormRow(handleAdd, () => setShowAdd(false), "추가")}
 
       {/* Search */}
       <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
@@ -250,7 +254,7 @@ export default function TimetableManager() {
               {filtered.map(item => editingId === item.id ? (
                 <tr key={item.id} style={{ background: '#eff6ff' }}>
                   <td colSpan={6} style={{ padding: '0.5rem' }}>
-                    <FormRow onSave={handleUpdate} onCancel={() => { setEditingId(null); setForm({ ...emptyForm }); }} saveLabel="저장" />
+                    {renderFormRow(handleUpdate, () => { setEditingId(null); setForm({ ...emptyForm }); }, "저장")}
                   </td>
                 </tr>
               ) : (
