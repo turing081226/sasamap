@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Edit3, Trash2, Search, Upload, Download, X, Save, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-const API = 'http://localhost:3001/api';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const DAYS = ['', '월', '화', '수', '목', '금'];
 
 const MOCK_TIMETABLES = [
@@ -123,7 +123,7 @@ export default function TimetableManager() {
             body: JSON.stringify({ timetables: mapped }),
           });
         }
-        setItems(mapped.map((m, i) => ({ ...m, id: i + 1, room_name: '-' })));
+        setItems(prev => [...prev, ...mapped.map((m, i) => ({ ...m, id: Date.now() + i, room_name: '-' }))]);
         showToast(`✅ ${mapped.length}개의 수업 데이터를 업로드했습니다.`);
       } catch { showToast('❌ 파일 처리 중 오류가 발생했습니다.'); }
     };
@@ -157,13 +157,15 @@ export default function TimetableManager() {
           <input style={inputSt} value={form.teacher_name} onChange={e => setForm(f => ({ ...f, teacher_name: e.target.value }))} /></div>
         <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>과목 *</label>
           <input style={inputSt} value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} /></div>
+        <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>교실 ID</label>
+          <input style={inputSt} type="number" placeholder="예: 1" value={form.room_id} onChange={e => setForm(f => ({ ...f, room_id: e.target.value ? Number(e.target.value) : '' }))} /></div>
         <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>요일</label>
           <select style={inputSt} value={form.day_of_week} onChange={e => setForm(f => ({ ...f, day_of_week: Number(e.target.value) }))}>
             {[1,2,3,4,5].map(d => <option key={d} value={d}>{DAYS[d]}</option>)}
           </select></div>
         <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>교시</label>
           <select style={inputSt} value={form.period} onChange={e => setForm(f => ({ ...f, period: Number(e.target.value) }))}>
-            {[1,2,3,4,5,6,7].map(p => <option key={p} value={p}>{p}교시</option>)}
+            {[1,2,3,4,5,6,7,8,9].map(p => <option key={p} value={p}>{p}교시</option>)}
           </select></div>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
@@ -177,7 +179,7 @@ export default function TimetableManager() {
 
   return (
     <div className="card" style={{ marginBottom: '1.5rem' }}>
-      {toast && <div style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 999, background: '#0f172a', color: 'white', padding: '0.75rem 1.25rem', borderRadius: '10px', fontSize: '0.9rem', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>{toast}</div>}
+      {toast && <div className="toast-popup">{toast}</div>}
 
       {usingMock && <div style={{ marginBottom: '0.75rem', padding: '0.5rem 0.8rem', borderRadius: '8px', background: '#fef9c3', color: '#713f12', fontSize: '0.8rem', border: '1px solid #fde68a' }}>⚠️ 임시 데이터 표시 중</div>}
 
@@ -214,7 +216,7 @@ export default function TimetableManager() {
             <code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: 4 }}>요일번호</code>{' (1=월 ~ 5=금) '}
             <code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: 4 }}>교시</code>{' (1~7)'}<br/>
             <strong>예시:</strong> 홍길동 | 수학 | 1 | 1 | 3 → 홍길동 선생님, 수학, 교실ID 1, 월요일 3교시<br/>
-            ⚠️ 업로드 시 <strong>기존 데이터가 모두 교체</strong>됩니다.
+            ✅ 업로드 시 <strong>기존 데이터에 추가</strong>됩니다.
           </div>
         )}
       </div>

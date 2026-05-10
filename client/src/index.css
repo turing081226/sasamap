@@ -183,6 +183,30 @@ body {
   transform: translateX(-50%) translateY(-8px);
 }
 
+/* Toast Notification */
+.toast-popup {
+  position: fixed;
+  bottom: 5.5rem; /* 모바일 하단바 위로 고정 */
+  right: 1.5rem;
+  z-index: 999;
+  background-color: white; /* 흰색 배경 */
+  color: #334155;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  pointer-events: none;
+  animation: toastFade 2s ease-in-out forwards;
+}
+
+@keyframes toastFade {
+  0% { opacity: 1; transform: translateY(0); }
+  75% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
 /* Top Header */
 .top-header {
   background-color: var(--card-bg);

@@ -29,7 +29,8 @@ export default function Search() {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:3001/api/search?q=${encodeURIComponent(query)}&type=${searchType}`);
+        const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const response = await fetch(`${API}/search?q=${encodeURIComponent(query)}&type=${searchType}`);
         if (!response.ok) throw new Error('Search failed');
         const data = await response.json();
         setResults(data);

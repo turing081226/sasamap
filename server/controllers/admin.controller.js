@@ -94,3 +94,24 @@ exports.uploadTimetable = async (req, res) => {
   }
 };
 
+// ─── Rooms ───────────────────────────────────────────────────────
+exports.getAllRooms = async (req, res) => {
+  try {
+    const [rooms] = await pool.query('SELECT id, name, floor, status FROM rooms ORDER BY floor, name');
+    res.json(rooms);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to retrieve rooms', error: err.message });
+  }
+};
+
+exports.updateRoomStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await pool.query('UPDATE rooms SET status = ? WHERE id = ?', [status, id]);
+    res.json({ message: 'Room status updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update room status', error: err.message });
+  }
+};
+

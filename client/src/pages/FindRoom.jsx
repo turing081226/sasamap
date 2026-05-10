@@ -33,17 +33,49 @@ const floorData = {
 };
 
 const statusColor = {
-  IN_USE:      { fill: '#fee2e2', stroke: '#ef4444', text: '#991b1b' },
-  EMPTY:       { fill: '#dcfce7', stroke: '#22c55e', text: '#166534' },
-  MAINTENANCE: { fill: '#fef9c3', stroke: '#eab308', text: '#713f12' },
+  IN_USE:         { fill: '#fee2e2', stroke: '#ef4444', text: '#991b1b' }, // Red (사용 중)
+  CLASS:          { fill: '#fef08a', stroke: '#eab308', text: '#854d0e' }, // Yellow (수업 중)
+  EMPTY:          { fill: '#dcfce7', stroke: '#22c55e', text: '#166534' }, // Green (빈 교실)
+  MAINTENANCE:    { fill: '#fef9c3', stroke: '#ca8a04', text: '#713f12' }, // Dark Yellow (점검 중)
+  NEEDS_APPROVAL: { fill: '#bfdbfe', stroke: '#3b82f6', text: '#1e3a8a' }, // Blue (승인 필요)
+  UNAVAILABLE:    { fill: '#f1f5f9', stroke: '#94a3b8', text: '#334155' }, // Gray (사용 불가)
 };
 
 const MAP_W = 500;
 const MAP_H = 320;
 
+const PERIODS = [
+  { id: 1, label: "1교시", time: "08:40-09:30" },
+  { id: 2, label: "2교시", time: "09:40-10:30" },
+  { id: 3, label: "3교시", time: "10:40-11:30" },
+  { id: 4, label: "4교시", time: "11:40-12:30" },
+  { id: 5, label: "5교시", time: "13:20-14:10" },
+  { id: 6, label: "6교시", time: "14:20-15:10" },
+  { id: 7, label: "7교시", time: "15:20-16:10" },
+  { id: 8, label: "8교시", time: "16:20-17:10" },
+  { id: 9, label: "9교시", time: "17:20-18:10" }
+];
+
+const getCurrentPeriod = () => {
+  const now = new Date();
+  const currentMins = now.getHours() * 60 + now.getMinutes();
+
+  for (const p of PERIODS) {
+    const [startStr, endStr] = p.time.split(/[-–]/);
+    const [sh, sm] = startStr.trim().split(':').map(Number);
+    const [eh, em] = endStr.trim().split(':').map(Number);
+    if (currentMins >= sh * 60 + sm && currentMins <= eh * 60 + em) {
+      return p.id;
+    }
+  }
+  return null;
+};
+
 export default function FindRoom() {
   const [floor, setFloor] = useState(1);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [timetables, setTimetables] = useState([]);
+  const [currentPeriod, setCurrentPeriod] = useState(getCurrentPeriod());
 
   // Pan & Zoom state
   const [scale, setScale] = useState(1);
@@ -52,7 +84,57 @@ export default function FindRoom() {
   const lastPos = useRef({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
-  const rooms = floorData[floor] || [];
+  useEffect(() => {
+    // Fetch all timetables for dynamic map state
+    const fetchTimetables = async () => {
+      try {
+        const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${API}/rooms/timetables`);
+        if (res.ok) {
+          const data = await res.json();
+          setTimetables(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch timetables', err);
+      }
+    };
+    fetchTimetables();
+
+    // Check time every minute
+    const interval = setInterval(() => {
+      setCurrentPeriod(getCurrentPeriod());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Compute dynamic rooms
+  const baseRooms = floorData[floor] || [];
+  const now = new Date();
+  const currentDay = now.getDay(); // 1 = Monday ... 5 = Friday
+
+  const rooms = baseRooms.map(room => {
+    // Keep maintenance state statically
+    if (room.status === 'MAINTENANCE') return room;
+    
+    // Check if there is an active class right now
+    if (currentDay >= 1 && currentDay <= 5 && currentPeriod) {
+      const activeClass = timetables.find(t => 
+        (t.room_name === room.name || t.room_id === room.id) && 
+        t.day_of_week === currentDay && 
+        t.period === currentPeriod
+      );
+      if (activeClass) {
+        return { 
+          ...room, 
+          status: 'IN_USE', 
+          current: `${activeClass.subject} (${activeClass.teacher_name})` 
+        };
+      }
+    }
+    
+    // Otherwise it's empty
+    return { ...room, status: 'EMPTY', current: '공강' };
+  });
 
   // Reset view when floor changes
   useEffect(() => {
@@ -251,9 +333,12 @@ export default function FindRoom() {
             <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '1.1rem' }}>
               <MapPin size={16} /> {selectedRoom.name}
             </span>
-            {selectedRoom.status === 'IN_USE'      && <span className="badge bg-red">사용중</span>}
-            {selectedRoom.status === 'EMPTY'       && <span className="badge bg-green">비어있음</span>}
-            {selectedRoom.status === 'MAINTENANCE' && <span className="badge bg-blue">점검중</span>}
+            {selectedRoom.status === 'IN_USE'         && <span className="badge bg-red">사용 중</span>}
+            {selectedRoom.status === 'CLASS'          && <span className="badge" style={{ background: '#fef08a', color: '#854d0e' }}>수업 중</span>}
+            {selectedRoom.status === 'EMPTY'          && <span className="badge bg-green">빈 교실</span>}
+            {selectedRoom.status === 'MAINTENANCE'    && <span className="badge" style={{ background: '#fef9c3', color: '#713f12' }}>점검 중</span>}
+            {selectedRoom.status === 'NEEDS_APPROVAL' && <span className="badge" style={{ background: '#bfdbfe', color: '#1e3a8a' }}>승인 필요</span>}
+            {selectedRoom.status === 'UNAVAILABLE'    && <span className="badge" style={{ background: '#f1f5f9', color: '#334155' }}>사용 불가</span>}
           </div>
           <p style={{ fontSize: '1rem', color: 'var(--text-main)', marginTop: '0.5rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>현재 상태:</span> {selectedRoom.current}

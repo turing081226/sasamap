@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Database, Search, Shield, ShieldOff, RefreshCw } from 'lucide-react';
 import TimetableManager from '../components/TimetableManager';
+import RoomManager from '../components/RoomManager';
+import { useAuth } from '../contexts/AuthContext';
 
-const API = 'http://localhost:3001/api';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // ─── Mock fallback (DB 연결 안 됐을 때) ────────────────────────
 const MOCK_USERS = [
@@ -13,6 +15,8 @@ const MOCK_USERS = [
 ];
 
 export default function Admin() {
+  const { user: currentUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('USERS');
   const [users, setUsers]       = useState([]);
   const [query, setQuery]       = useState('');
   const [loading, setLoading]   = useState(true);
@@ -82,31 +86,46 @@ export default function Admin() {
 
   return (
     <div>
-      <h1 className="title" style={{ color: '#991b1b' }}>🛡️ 관리자 페이지</h1>
+      <h1 className="title" style={{ color: '#991b1b', marginBottom: '1.2rem' }}>🛡️ 관리자 페이지</h1>
+
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+        <button 
+          onClick={() => setActiveTab('USERS')}
+          className="btn" 
+          style={{ background: activeTab === 'USERS' ? 'var(--primary)' : '#e2e8f0', color: activeTab === 'USERS' ? 'white' : 'var(--text-main)', whiteSpace: 'nowrap' }}>
+          유저 관리
+        </button>
+        <button 
+          onClick={() => setActiveTab('TIMETABLES')}
+          className="btn" 
+          style={{ background: activeTab === 'TIMETABLES' ? 'var(--primary)' : '#e2e8f0', color: activeTab === 'TIMETABLES' ? 'white' : 'var(--text-main)', whiteSpace: 'nowrap' }}>
+          수업 데이터 관리
+        </button>
+        <button 
+          onClick={() => setActiveTab('ROOMS')}
+          className="btn" 
+          style={{ background: activeTab === 'ROOMS' ? 'var(--primary)' : '#e2e8f0', color: activeTab === 'ROOMS' ? 'white' : 'var(--text-main)', whiteSpace: 'nowrap' }}>
+          교실 상태 관리
+        </button>
+      </div>
 
       {/* Toast */}
-      {toast && (
-        <div style={{
-          position: 'fixed', top: '1rem', right: '1rem', zIndex: 999,
-          background: '#0f172a', color: 'white', padding: '0.75rem 1.25rem',
-          borderRadius: '10px', fontSize: '0.9rem', boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-        }}>
-          {toast}
-        </div>
-      )}
-
-      {usingMock && (
-        <div style={{
-          marginBottom: '1rem', padding: '0.6rem 1rem', borderRadius: '8px',
-          background: '#fef9c3', color: '#713f12', fontSize: '0.85rem',
-          border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '0.5rem'
-        }}>
-          ⚠️ DB 연결 없이 임시 데이터를 표시 중입니다. 권한 변경은 로컬에서만 반영됩니다.
-        </div>
-      )}
+      {toast && <div className="toast-popup">{toast}</div>}
 
       {/* ── 유저 정보 관리 ── */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
+      {activeTab === 'USERS' && (
+        <>
+          {usingMock && (
+            <div style={{
+              marginBottom: '1rem', padding: '0.6rem 1rem', borderRadius: '8px',
+              background: '#fef9c3', color: '#713f12', fontSize: '0.85rem',
+              border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '0.5rem'
+            }}>
+              ⚠️ DB 연결 없이 임시 데이터를 표시 중입니다. 권한 변경은 로컬에서만 반영됩니다.
+            </div>
+          )}
+
+          <div className="card" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <h2 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Users size={20} color="var(--primary)" /> 유저 정보 관리
@@ -176,8 +195,8 @@ export default function Admin() {
                     <td style={{ padding: '0.65rem 0.75rem', textAlign: 'center' }}>
                       <button
                         onClick={() => toggleRole(u)}
-                        disabled={updating === u.id}
-                        title={u.role === 'ADMIN' ? '일반 유저로 변경' : '관리자로 승격'}
+                        disabled={updating === u.id || (currentUser && (currentUser.id === u.id || currentUser.email === u.email))}
+                        title={(currentUser && (currentUser.id === u.id || currentUser.email === u.email)) ? '자신의 권한은 해제할 수 없습니다' : (u.role === 'ADMIN' ? '일반 유저로 변경' : '관리자로 승격')}
                         style={{
                           display: 'inline-flex', alignItems: 'center', gap: '4px',
                           padding: '0.35rem 0.75rem', borderRadius: '7px',
@@ -185,9 +204,9 @@ export default function Admin() {
                           borderColor: u.role === 'ADMIN' ? '#fecaca' : '#bfdbfe',
                           background: u.role === 'ADMIN' ? '#fff7f7' : '#eff6ff',
                           color: u.role === 'ADMIN' ? '#dc2626' : '#2563eb',
-                          cursor: updating === u.id ? 'wait' : 'pointer',
+                          cursor: (updating === u.id || (currentUser && (currentUser.id === u.id || currentUser.email === u.email))) ? 'not-allowed' : 'pointer',
                           fontSize: '0.8rem', fontWeight: '600',
-                          opacity: updating === u.id ? 0.6 : 1,
+                          opacity: (updating === u.id || (currentUser && (currentUser.id === u.id || currentUser.email === u.email))) ? 0.6 : 1,
                         }}
                       >
                         {u.role === 'ADMIN'
@@ -202,10 +221,15 @@ export default function Admin() {
             </table>
           </div>
         )}
-      </div>
+          </div>
+        </>
+      )}
 
       {/* ── 수업 데이터 관리 ── */}
-      <TimetableManager />
+      {activeTab === 'TIMETABLES' && <TimetableManager />}
+
+      {/* ── 교실 상태 관리 ── */}
+      {activeTab === 'ROOMS' && <RoomManager />}
     </div>
   );
 }

@@ -17,5 +17,9 @@ router.put('/timetables/:id', adminController.updateTimetable);
 router.delete('/timetables/:id', adminController.deleteTimetable);
 router.post('/timetable', adminController.uploadTimetable); // bulk upload
 
+// Rooms
+router.get('/rooms', adminController.getAllRooms);
+router.put('/rooms/:id/status', adminController.updateRoomStatus);
+
 module.exports = router;
 
