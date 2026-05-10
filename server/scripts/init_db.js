@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/../.env' });
 const mysql = require('mysql2/promise');
 
 async function initDB() {
@@ -99,6 +99,13 @@ async function initDB() {
       )
     `);
     console.log('Table `user_timetables` ready.');
+
+    // ── Seed default admin user ──
+    await connection.query(`
+      INSERT IGNORE INTO users (email, name, role) 
+      VALUES ('woolrabit77@sasa.hs.kr', '관리자', 'ADMIN')
+    `);
+    console.log('Default admin user seeded (woolrabit77@sasa.hs.kr).');
 
     await connection.end();
     console.log('Database initialization completed successfully.');

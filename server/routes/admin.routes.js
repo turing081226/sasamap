@@ -6,8 +6,16 @@ const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 router.use(verifyToken);
 router.use(isAdmin);
 
+// Users
 router.get('/users', adminController.getAllUsers);
 router.put('/users/:id/role', adminController.updateUserRole);
-router.post('/timetable', adminController.uploadTimetable);
+
+// Timetables
+router.get('/timetables', adminController.getAllTimetables);
+router.post('/timetables', adminController.createTimetable);
+router.put('/timetables/:id', adminController.updateTimetable);
+router.delete('/timetables/:id', adminController.deleteTimetable);
+router.post('/timetable', adminController.uploadTimetable); // bulk upload
 
 module.exports = router;
+
