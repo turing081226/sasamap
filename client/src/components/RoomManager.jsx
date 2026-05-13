@@ -134,7 +134,8 @@ export default function RoomManager() {
         showToast('✅ 추가되었습니다.');
       }
       setIsModalOpen(false);
-    } catch {
+    } catch (err) {
+      console.error("Save room error:", err);
       showToast('❌ 저장 실패');
     }
   };

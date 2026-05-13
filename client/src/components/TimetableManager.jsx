@@ -64,7 +64,10 @@ export default function TimetableManager() {
       setForm({ ...emptyForm });
       setShowAdd(false);
       showToast('✅ 수업이 추가되었습니다.');
-    } catch { showToast('❌ 추가 실패'); }
+    } catch (err) { 
+      console.error("Timetable add error:", err);
+      showToast('❌ 추가 실패'); 
+    }
   };
 
   const startEdit = (item) => {
@@ -87,7 +90,10 @@ export default function TimetableManager() {
       setEditingId(null);
       setForm({ ...emptyForm });
       showToast('✅ 수업이 수정되었습니다.');
-    } catch { showToast('❌ 수정 실패'); }
+    } catch (err) { 
+      console.error("Timetable update error:", err);
+      showToast('❌ 수정 실패'); 
+    }
   };
 
   const handleDelete = async (id) => {
