@@ -1,0 +1,1 @@
+const fs = require('fs'); const content = fs.readFileSync('C:/Users/woolr/Desktop/1F.svg', 'utf8'); const match = content.match(/xlink:href="data:image\/jpeg;base64,([^"]+)"/); if(match && match[1]) { fs.writeFileSync('./client/public/1F_bg.jpg', Buffer.from(match[1], 'base64')); console.log('Extracted to 1F_bg.jpg'); }

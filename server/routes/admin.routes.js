@@ -19,7 +19,10 @@ router.post('/timetable', adminController.uploadTimetable); // bulk upload
 
 // Rooms
 router.get('/rooms', adminController.getAllRooms);
+router.post('/rooms', adminController.createRoom);
+router.put('/rooms/:id', adminController.updateRoomInfo);
 router.put('/rooms/:id/status', adminController.updateRoomStatus);
+router.delete('/rooms/:id', adminController.deleteRoom);
 
 module.exports = router;
 

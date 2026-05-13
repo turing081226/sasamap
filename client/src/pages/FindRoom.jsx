@@ -217,7 +217,14 @@ export default function FindRoom() {
             transition: 'none',
           }}
         >
-          {floor !== 1 && (
+          {floor === 1 && (
+            <image href="/1F_bg.jpg" width="2564" height="2788" transform="translate(329.92 47.83) scale(.48)" />
+          )}
+          {floor === 2 && (
+            <image href="/2F_bg.jpg" width="2612" height="2760" transform="translate(318.5 51.6) scale(.5)" />
+          )}
+
+          {floor !== 1 && floor !== 2 && (
             <>
               {/* Floor outline */}
               <rect x="40" y="30" width={MAP_W - 80} height={MAP_H - 60}
@@ -236,13 +243,14 @@ export default function FindRoom() {
           {rooms.map(room => {
             const col = statusColor[room.status] || statusColor.EMPTY;
             const isSelected = selectedRoom?.id === room.id;
-            const strokeWidth = floor === 1 ? (isSelected ? 5 : 2.5) : (isSelected ? 3 : 1.5);
+            const isSVGFloor = floor === 1 || floor === 2;
+            const strokeWidth = isSVGFloor ? (isSelected ? 5 : 2.5) : (isSelected ? 3 : 1.5);
             return (
               <g key={room.id} onClick={(e) => handleRoomClick(e, room)} style={{ cursor: 'pointer' }}>
                 {room.type === 'rect' && (
                   <rect
                     x={room.x} y={room.y} width={room.w} height={room.h}
-                    fill={col.fill} stroke={isSelected ? '#1d4ed8' : col.stroke} strokeWidth={strokeWidth} rx={floor === 1 ? 0 : 6}
+                    fill={col.fill} stroke={isSelected ? '#1d4ed8' : col.stroke} strokeWidth={strokeWidth} rx={isSVGFloor ? 0 : 6}
                   />
                 )}
                 {room.type === 'polygon' && (
@@ -266,7 +274,7 @@ export default function FindRoom() {
                 >
                   <div xmlns="http://www.w3.org/1999/xhtml"
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <span style={{ fontSize: floor === 1 ? '16px' : '11px', fontWeight: '700', color: col.text, textAlign: 'center', lineHeight: 1.2 }}>{room.name}</span>
+                    <span style={{ fontSize: isSVGFloor ? '16px' : '11px', fontWeight: '700', color: col.text, textAlign: 'center', lineHeight: 1.2 }}>{room.name}</span>
                   </div>
                 </foreignObject>
               </g>

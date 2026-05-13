@@ -97,7 +97,7 @@ exports.uploadTimetable = async (req, res) => {
 // ─── Rooms ───────────────────────────────────────────────────────
 exports.getAllRooms = async (req, res) => {
   try {
-    const [rooms] = await pool.query('SELECT id, name, floor, status FROM rooms ORDER BY floor, name');
+    const [rooms] = await pool.query('SELECT id, name, floor, type, status, description FROM rooms ORDER BY floor, name');
     res.json(rooms);
   } catch (err) {
     res.status(500).json({ message: 'Failed to retrieve rooms', error: err.message });
@@ -115,3 +115,39 @@ exports.updateRoomStatus = async (req, res) => {
   }
 };
 
+exports.createRoom = async (req, res) => {
+  try {
+    const { name, floor, type, description } = req.body;
+    const [result] = await pool.query(
+      'INSERT INTO rooms (name, floor, type, description, status) VALUES (?, ?, ?, ?, ?)',
+      [name, floor, type || null, description || null, 'EMPTY']
+    );
+    res.json({ message: 'Room created successfully', id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to create room', error: err.message });
+  }
+};
+
+exports.updateRoomInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, floor, type, description } = req.body;
+    await pool.query(
+      'UPDATE rooms SET name = ?, floor = ?, type = ?, description = ? WHERE id = ?',
+      [name, floor, type || null, description || null, id]
+    );
+    res.json({ message: 'Room info updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update room info', error: err.message });
+  }
+};
+
+exports.deleteRoom = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM rooms WHERE id = ?', [id]);
+    res.json({ message: 'Room deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete room', error: err.message });
+  }
+};
