@@ -57,30 +57,6 @@ export const floorData = {
   },
   3: {
     viewBox: "0 0 500 320",
-    rooms: [
-      { id: 10, name: '3-1반', type: 'rect', x: 60,  y: 60,  w: 100, h: 70, cx: 110, cy: 95, status: 'IN_USE',     current: '물리 (박과학)' },
-      { id: 11, name: '3-2반', type: 'rect', x: 180, y: 60,  w: 100, h: 70, cx: 230, cy: 95, status: 'EMPTY',      current: '공강' },
-      { id: 12, name: '과학실', type: 'rect', x: 300, y: 60,  w: 100, h: 70, cx: 350, cy: 95, status: 'EMPTY',      current: '공강' },
-      { id: 13, name: '도서관', type: 'rect', x: 60,  y: 160, w: 340, h: 80, cx: 230, cy: 200, status: 'IN_USE',     current: '개방 중' },
-    ]
-  },
-  4: {
-    viewBox: "0 0 500 320",
-    rooms: [
-      { id: 14, name: '4-1반', type: 'rect', x: 60,  y: 60,  w: 100, h: 70, cx: 110, cy: 95, status: 'EMPTY',      current: '공강' },
-      { id: 15, name: '강당', type: 'rect', x: 200, y: 40,  w: 180, h: 150, cx: 290, cy: 115, status: 'IN_USE',    current: '행사 중' },
-    ]
-  },
-  5: {
-    viewBox: "0 0 500 320",
-    rooms: [
-      { id: 16, name: '미술실', type: 'rect', x: 60,  y: 60,  w: 120, h: 80, cx: 120, cy: 100, status: 'MAINTENANCE', current: '공사중' },
-      { id: 17, name: '옥상정원', type: 'rect', x: 220, y: 50,  w: 160, h: 120, cx: 300, cy: 110, status: 'EMPTY',   current: '개방' },
-    ]
-  }
-
-  3: {
-    viewBox: "0 0 500 320",
     bgImage: "/3F_bg.jpg",
     rooms: [
         {
