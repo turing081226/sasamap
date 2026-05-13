@@ -1,36 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 
-// 층별 교실 배치 데이터 (임시 지도 좌표 포함)
-const floorData = {
-  1: [
-    { id: 1, name: '1-1반', x: 60,  y: 60,  w: 100, h: 70, status: 'IN_USE',      current: '수학 (홍길동)' },
-    { id: 2, name: '1-2반', x: 180, y: 60,  w: 100, h: 70, status: 'EMPTY',       current: '공강' },
-    { id: 3, name: '1-3반', x: 300, y: 60,  w: 100, h: 70, status: 'EMPTY',       current: '공강' },
-    { id: 4, name: '화장실', x: 60,  y: 160, w: 70,  h: 50, status: 'MAINTENANCE', current: '점검중' },
-    { id: 5, name: '교무실', x: 180, y: 160, w: 220, h: 80, status: 'IN_USE',      current: '재실' },
-  ],
-  2: [
-    { id: 6, name: '2-1반', x: 60,  y: 60,  w: 100, h: 70, status: 'EMPTY',       current: '공강' },
-    { id: 7, name: '음악실', x: 180, y: 60,  w: 120, h: 70, status: 'MAINTENANCE', current: '청소중' },
-    { id: 8, name: '2-2반', x: 60,  y: 160, w: 100, h: 70, status: 'IN_USE',      current: '영어 (김영희)' },
-    { id: 9, name: '미디어실', x: 180, y: 160, w: 120, h: 70, status: 'EMPTY',     current: '공강' },
-  ],
-  3: [
-    { id: 10, name: '3-1반', x: 60,  y: 60,  w: 100, h: 70, status: 'IN_USE',     current: '물리 (박과학)' },
-    { id: 11, name: '3-2반', x: 180, y: 60,  w: 100, h: 70, status: 'EMPTY',      current: '공강' },
-    { id: 12, name: '과학실', x: 300, y: 60,  w: 100, h: 70, status: 'EMPTY',      current: '공강' },
-    { id: 13, name: '도서관', x: 60,  y: 160, w: 340, h: 80, status: 'IN_USE',     current: '개방 중' },
-  ],
-  4: [
-    { id: 14, name: '4-1반', x: 60,  y: 60,  w: 100, h: 70, status: 'EMPTY',      current: '공강' },
-    { id: 15, name: '강당',   x: 200, y: 40,  w: 180, h: 150, status: 'IN_USE',    current: '행사 중' },
-  ],
-  5: [
-    { id: 16, name: '미술실', x: 60,  y: 60,  w: 120, h: 80, status: 'MAINTENANCE', current: '공사중' },
-    { id: 17, name: '옥상정원', x: 220, y: 50,  w: 160, h: 120, status: 'EMPTY',   current: '개방' },
-  ],
-};
+import { floorData } from './floorData';
 
 const statusColor = {
   IN_USE:         { fill: '#fee2e2', stroke: '#ef4444', text: '#991b1b' }, // Red (사용 중)
@@ -108,7 +79,8 @@ export default function FindRoom() {
   }, []);
 
   // Compute dynamic rooms
-  const baseRooms = floorData[floor] || [];
+  const currentFloorConfig = floorData[floor] || { viewBox: "0 0 500 320", rooms: [] };
+  const baseRooms = currentFloorConfig.rooms;
   const now = new Date();
   const currentDay = now.getDay(); // 1 = Monday ... 5 = Friday
 
@@ -221,7 +193,7 @@ export default function FindRoom() {
         onWheel={onWheel}
         style={{
           width: '100%',
-          height: '300px',
+          height: '400px',
           overflow: 'hidden',
           background: '#f1f5f9',
           borderRadius: '12px',
@@ -235,43 +207,66 @@ export default function FindRoom() {
       >
         {/* SVG map */}
         <svg
-          width={MAP_W}
-          height={MAP_H}
+          viewBox={currentFloorConfig.viewBox}
           style={{
             position: 'absolute',
+            width: '100%',
+            height: '100%',
             transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
             transformOrigin: '0 0',
             transition: 'none',
           }}
         >
-          {/* Floor outline */}
-          <rect x="40" y="30" width={MAP_W - 80} height={MAP_H - 60}
-            fill="white" stroke="#cbd5e1" strokeWidth="2" rx="8" />
-          {/* Floor label */}
-          <text x="50" y="24" fontSize="13" fill="#64748b" fontWeight="600">{floor}층 평면도</text>
+          {floor !== 1 && (
+            <>
+              {/* Floor outline */}
+              <rect x="40" y="30" width={MAP_W - 80} height={MAP_H - 60}
+                fill="white" stroke="#cbd5e1" strokeWidth="2" rx="8" />
+              {/* Floor label */}
+              <text x="50" y="24" fontSize="13" fill="#64748b" fontWeight="600">{floor}층 평면도</text>
 
-          {/* Hallway */}
-          <rect x="40" y="130" width={MAP_W - 80} height="20"
-            fill="#e2e8f0" stroke="none" />
-          <text x={MAP_W / 2} y="143" fontSize="10" fill="#94a3b8" textAnchor="middle">복도</text>
+              {/* Hallway */}
+              <rect x="40" y="130" width={MAP_W - 80} height="20"
+                fill="#e2e8f0" stroke="none" />
+              <text x={MAP_W / 2} y="143" fontSize="10" fill="#94a3b8" textAnchor="middle">복도</text>
+            </>
+          )}
 
           {/* Rooms */}
           {rooms.map(room => {
             const col = statusColor[room.status] || statusColor.EMPTY;
             const isSelected = selectedRoom?.id === room.id;
+            const strokeWidth = floor === 1 ? (isSelected ? 5 : 2.5) : (isSelected ? 3 : 1.5);
             return (
               <g key={room.id} onClick={(e) => handleRoomClick(e, room)} style={{ cursor: 'pointer' }}>
-                <rect
-                  x={room.x} y={room.y} width={room.w} height={room.h}
-                  fill={col.fill}
-                  stroke={isSelected ? '#1d4ed8' : col.stroke}
-                  strokeWidth={isSelected ? 3 : 1.5}
-                  rx="6"
-                />
-                <foreignObject x={room.x + 4} y={room.y + 4} width={room.w - 8} height={room.h - 8}>
+                {room.type === 'rect' && (
+                  <rect
+                    x={room.x} y={room.y} width={room.w} height={room.h}
+                    fill={col.fill} stroke={isSelected ? '#1d4ed8' : col.stroke} strokeWidth={strokeWidth} rx={floor === 1 ? 0 : 6}
+                  />
+                )}
+                {room.type === 'polygon' && (
+                  <polygon
+                    points={room.points}
+                    fill={col.fill} stroke={isSelected ? '#1d4ed8' : col.stroke} strokeWidth={strokeWidth}
+                  />
+                )}
+                {room.type === 'path' && (
+                  <path
+                    d={room.d}
+                    fill={col.fill} stroke={isSelected ? '#1d4ed8' : col.stroke} strokeWidth={strokeWidth}
+                  />
+                )}
+                <foreignObject 
+                  x={room.cx - 25} 
+                  y={room.cy - 10} 
+                  width="50" 
+                  height="20"
+                  style={{ pointerEvents: 'none' }}
+                >
                   <div xmlns="http://www.w3.org/1999/xhtml"
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <span style={{ fontSize: '11px', fontWeight: '700', color: col.text, textAlign: 'center', lineHeight: 1.2 }}>{room.name}</span>
+                    <span style={{ fontSize: floor === 1 ? '16px' : '11px', fontWeight: '700', color: col.text, textAlign: 'center', lineHeight: 1.2 }}>{room.name}</span>
                   </div>
                 </foreignObject>
               </g>
