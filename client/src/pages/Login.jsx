@@ -60,7 +60,7 @@ export default function Login() {
           <img 
             src={logoImg} 
             alt="Logo" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
           /></div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.3rem' }}>
             SASA 공강맵
