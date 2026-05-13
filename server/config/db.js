@@ -8,7 +8,7 @@ const pgPool = new Pool({
   }
 });
 
-const wrapQuery = async (client, sql, params) => {
+const wrapQuery = async (client, sql, params = []) => {
   // Convert ? to $1, $2, etc.
   let i = 1;
   let pgSql = sql.replace(/\?/g, () => `$${i++}`);
@@ -38,13 +38,13 @@ const wrapQuery = async (client, sql, params) => {
 };
 
 const pool = {
-  query: async (sql, params) => {
+  query: async (sql, params = []) => {
     return wrapQuery(pgPool, sql, params);
   },
   getConnection: async () => {
     const client = await pgPool.connect();
     return {
-      query: async (sql, params) => wrapQuery(client, sql, params),
+      query: async (sql, params = []) => wrapQuery(client, sql, params),
       release: () => client.release(),
       beginTransaction: () => client.query('BEGIN'),
       commit: () => client.query('COMMIT'),
