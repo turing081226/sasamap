@@ -21,11 +21,7 @@ sasamap/
 `server/.env.example`을 복사해서 `server/.env`로 만들고 값을 채워주세요.
 
 ```env
-DB_HOST=127.0.0.1
-DB_USER=root
-DB_PASSWORD=비밀번호
-DB_NAME=sasamap
-DB_PORT=3306
+DATABASE_URL=postgresql://postgres:비밀번호@localhost:5432/sasamap
 
 PORT=3001
 JWT_SECRET=랜덤문자열
@@ -44,23 +40,19 @@ VITE_API_URL=http://localhost:3001/api
 
 ## 🗄️ 데이터베이스 연결 및 초기화
 
+이 프로젝트는 **PostgreSQL**을 사용합니다.
+
 ### A. 기존 데이터베이스를 연결하는 경우 (데이터가 이미 있을 때)
-1. **환경변수 설정**: `server/.env` 파일의 `DB_NAME`을 기존에 사용하던 데이터베이스 이름으로 변경하세요. (`DB_HOST`, `DB_USER`, `DB_PASSWORD` 등도 맞게 설정)
-2. **초기화 스크립트 생략**: 이미 테이블과 데이터가 존재하므로, 아래 B 단계의 초기화 스크립트를 실행할 필요 없이 바로 서버를 실행하시면 됩니다.
+1. **환경변수 설정**: `server/.env` 파일의 `DATABASE_URL`을 기존에 사용하던 데이터베이스 연결 문자열로 변경하세요.
+2. **초기화 스크립트 생략**: 이미 테이블과 데이터가 존재하므로, 바로 서버를 실행하시면 됩니다.
 
 ### B. 새로 데이터베이스를 구축하는 경우 (처음 실행 시)
-1. **환경변수 설정**: `server/.env`에 사용할 DB 정보를 입력합니다.
-2. **초기화 스크립트 실행**: 터미널에서 아래 명령어를 통해 데이터베이스를 생성하고 초기 데이터를 추가합니다.
-
-```bash
-cd server
-node scripts/init_db.js
-```
-*필요시 추가 시드 스크립트 실행*:
-```bash
-node scripts/seed_lessons.js
-node scripts/data.js
-```
+1. **PostgreSQL 설치 및 실행**: PostgreSQL 서버가 실행 중인지 확인하고 `sasamap` 데이터베이스를 생성합니다.
+2. **환경변수 설정**: `server/.env`에 사용할 DB 연결 정보(`DATABASE_URL`)를 입력합니다.
+3. **초기 데이터 복원**: 프로젝트 루트 디렉토리에 있는 `sasamap_pg_dump.sql` 파일을 이용해 데이터베이스를 초기화합니다.
+   ```bash
+   psql -U postgres -d sasamap -f sasamap_pg_dump.sql
+   ```
 
 ---
 
@@ -104,16 +96,17 @@ http://localhost:5173
 |------|------|
 | 프론트엔드 | React, Vite, React Router |
 | 백엔드 | Node.js, Express |
-| 데이터베이스 | MySQL |
+| 데이터베이스 | PostgreSQL |
 | 인증 | JWT, Google OAuth2 |
 
 ---
 
 ## ⚠️ 주의사항
 
-- MySQL이 실행 중이어야 DB에 연결됩니다.
+- PostgreSQL이 실행 중이어야 DB에 연결됩니다.
 - `client/.env`의 `VITE_API_URL`이 `http://localhost:3001/api`인지 확인하세요.
-- 로그인은 `@sasa.hs.kr` 이메일만 허용됩니다.
+- 로그인은 `@sasa.hs.kr` 구글 계정으로만 허용됩니다.
+- 관리자 권한은 DB의 `users` 테이블에서 `role` 컬럼을 `ADMIN`으로 설정하면 부여됩니다. (기본 관리자 계정: woolrabit77@sasa.hs.kr)
 
 ---
 
