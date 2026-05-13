@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import logoImg from '../assets/logo.png';
 
 export default function Login() {
   const { mockLogin } = useAuth();
@@ -49,12 +50,18 @@ export default function Login() {
         {/* Logo area */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            width: '64px', height: '64px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: '64px',      // 로고의 가로 크기
+            height: '64px',     // 로고의 세로 크기
             margin: '0 auto 1rem',
-            fontSize: '1.75rem',
-          }}>🏫</div>
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+          <img 
+            src={logoImg} 
+            alt="Logo" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          /></div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.3rem' }}>
             SASA 공강맵
           </h1>
