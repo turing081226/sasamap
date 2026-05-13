@@ -223,8 +223,17 @@ export default function FindRoom() {
           {floor === 2 && (
             <image href="/2F_bg.jpg" width="2612" height="2760" transform="translate(318.5 51.6) scale(.5)" />
           )}
+          {floor === 3 && (
+            <image href="/3F_bg.jpg" width="2564" height="2736" transform="translate(359.4 88.26) scale(.48)" />
+          )}
+          {floor === 4 && (
+            <image href="/4F_bg.jpg" width="2592" height="2760" transform="translate(366.15 84.68) scale(.48)" />
+          )}
+          {floor === 5 && (
+            <image href="/5F_bg.jpg" width="2540" height="2752" transform="translate(361.13 86.7) scale(.48)" />
+          )}
 
-          {floor !== 1 && floor !== 2 && (
+          {floor !== 1 && floor !== 2 && floor !== 3 && floor !== 4 && floor !== 5 && (
             <>
               {/* Floor outline */}
               <rect x="40" y="30" width={MAP_W - 80} height={MAP_H - 60}
@@ -243,7 +252,7 @@ export default function FindRoom() {
           {rooms.map(room => {
             const col = statusColor[room.status] || statusColor.EMPTY;
             const isSelected = selectedRoom?.id === room.id;
-            const isSVGFloor = floor === 1 || floor === 2;
+            const isSVGFloor = floor >= 1 && floor <= 5;
             const strokeWidth = isSVGFloor ? (isSelected ? 5 : 2.5) : (isSelected ? 3 : 1.5);
             return (
               <g key={room.id} onClick={(e) => handleRoomClick(e, room)} style={{ cursor: 'pointer' }}>
@@ -310,17 +319,18 @@ export default function FindRoom() {
         </div>
       </div>
 
-      {/* Floor selector — centered */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+      {/* Floor Selection */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         {[1, 2, 3, 4, 5].map(f => (
           <button
             key={f}
-            onClick={() => setFloor(f)}
-            className="btn"
-            style={{
-              minWidth: '52px',
-              backgroundColor: floor === f ? 'var(--primary)' : '#e2e8f0',
-              color: floor === f ? 'white' : 'var(--text-main)',
+            className={`btn ${floor === f ? 'btn-primary' : ''}`}
+            onClick={() => { setFloor(f); setSelectedRoom(null); }}
+            style={{ 
+              flex: '1', 
+              background: floor !== f ? 'white' : undefined,
+              color: floor !== f ? '#475569' : undefined,
+              border: floor !== f ? '1px solid #cbd5e1' : undefined
             }}
           >
             {f}층
