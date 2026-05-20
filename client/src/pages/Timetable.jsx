@@ -596,21 +596,72 @@ export default function Timetable() {
         .custom-textbox:focus {
           border-color: var(--primary);
         }
+
+        /* Mobile Responsive Fitting for Timetable Grid */
+        @media (max-width: 768px) {
+          .timetable-table {
+            min-width: unset !important;
+            border-spacing: 2px !important;
+          }
+          .timetable-table th {
+            font-size: 0.72rem !important;
+            padding: 4px 2px !important;
+          }
+          .timetable-table th.time-column-header {
+            width: 38px !important;
+          }
+          .time-cell {
+            height: 52px !important;
+            padding: 2px 1px !important;
+          }
+          .time-cell .period-number {
+            font-size: 0.95rem !important;
+          }
+          .time-cell .period-time {
+            display: none !important;
+          }
+          .cell-interactive {
+            height: 52px !important;
+          }
+          .class-block {
+            padding: 2px 3px !important;
+            border-radius: 4px !important;
+          }
+          .class-subject {
+            font-size: 0.62rem !important;
+            line-height: 1.1 !important;
+            -webkit-line-clamp: 2 !important;
+          }
+          .class-teacher {
+            display: none !important;
+          }
+          .class-room {
+            font-size: 0.58rem !important;
+            font-weight: 800 !important;
+            margin-top: 1px !important;
+          }
+          .lunch-row-container {
+            height: 32px !important;
+            font-size: 0.72rem !important;
+          }
+          .lunch-time-text {
+            font-size: 0.62rem !important;
+            margin-left: 4px !important;
+          }
+        }
       `}</style>
 
       {/* Global Notifications popup */}
       {notif.text && (
-        <div style={{
-          position: 'fixed', top: '20px', right: '20px', zIndex: 2000,
-          padding: '0.85rem 1.5rem', borderRadius: '12px',
+        <div className="toast-popup" style={{
           background: notif.type === 'success' ? '#dcfce7' : '#fee2e2',
           border: `1px solid ${notif.type === 'success' ? '#22c55e' : '#ef4444'}`,
           color: notif.type === 'success' ? '#14532d' : '#7f1d1d',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontWeight: '600',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           display: 'flex', alignItems: 'center', gap: '8px',
-          animation: 'slideIn 0.3s ease-out',
+          animation: 'toastFade 3s ease-in-out forwards',
         }}>
-          {notif.type === 'success' ? <Check size={18} /> : <X size={18} />}
+          {notif.type === 'success' ? <Check size={14} /> : <X size={14} />}
           {notif.text}
         </div>
       )}

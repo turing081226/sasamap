@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 import { floorData } from './floorData';
 
@@ -43,11 +44,13 @@ const getCurrentPeriod = () => {
 };
 
 export default function FindRoom() {
+  const { token } = useAuth();
   const [floor, setFloor] = useState(1);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [timetables, setTimetables] = useState([]);
   const [occupancies, setOccupancies] = useState([]);
   const [currentPeriod, setCurrentPeriod] = useState(getCurrentPeriod());
+  const [dbRooms, setDbRooms] = useState([]);
 
   // Pan & Zoom state
   const [scale, setScale] = useState(1);
@@ -55,6 +58,26 @@ export default function FindRoom() {
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const containerRef = useRef(null);
+
+  // Fetch dbRooms
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (!token) return;
+      try {
+        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+        const res = await fetch(`${API}/rooms`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setDbRooms(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch rooms', err);
+      }
+    };
+    fetchRooms();
+  }, [token]);
 
   useEffect(() => {
     // Fetch all timetables for dynamic map state
@@ -103,8 +126,20 @@ export default function FindRoom() {
   const currentDay = now.getDay(); // 1 = Monday ... 5 = Friday
 
   const rooms = baseRooms.map(room => {
-    // Keep maintenance state statically
-    if (room.status === 'MAINTENANCE') return room;
+    // Check DB status first to see if it's MAINTENANCE, UNAVAILABLE, or NEEDS_APPROVAL
+    const dbRoom = dbRooms.find(r => r.name === room.name);
+    const status = dbRoom ? dbRoom.status : room.status;
+    const description = dbRoom ? dbRoom.description : room.current;
+
+    if (status === 'MAINTENANCE') {
+      return { ...room, status: 'MAINTENANCE', current: description || '점검 중' };
+    }
+    if (status === 'UNAVAILABLE') {
+      return { ...room, status: 'UNAVAILABLE', current: description || '사용 불가' };
+    }
+    if (status === 'NEEDS_APPROVAL') {
+      return { ...room, status: 'NEEDS_APPROVAL', current: description || '승인 필요' };
+    }
     
     // Check if there is an active class or user occupancy right now
     if (currentDay >= 1 && currentDay <= 5 && currentPeriod) {
@@ -240,7 +275,47 @@ export default function FindRoom() {
 
   return (
     <div>
-      <h1 className="title" style={{ marginBottom: '1rem' }}>🏫 교실 찾기</h1>
+      <h1 className="title" style={{ marginBottom: '0.75rem' }}>🏫 교실 찾기</h1>
+
+      {/* Map status legend */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+        gap: '0.4rem',
+        padding: '0.6rem',
+        background: 'var(--card-bg)',
+        borderRadius: '10px',
+        border: '1px solid var(--border-color)',
+        marginBottom: '1rem',
+        fontSize: '0.78rem'
+      }}>
+        {Object.entries(statusColor).map(([key, col]) => {
+          let label = "기타";
+          if (key === 'EMPTY') label = "빈 교실";
+          if (key === 'CLASS') label = "수업 중";
+          if (key === 'IN_USE') label = "사용 중";
+          if (key === 'MAINTENANCE') label = "점검 중";
+          if (key === 'NEEDS_APPROVAL') label = "승인 필요";
+          if (key === 'UNAVAILABLE') label = "사용 불가";
+
+          return (
+            <div key={key} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '6px', 
+              padding: '4px 6px', 
+              borderRadius: '6px', 
+              background: col.fill, 
+              border: `1px solid ${col.stroke}`,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+            }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: col.stroke, display: 'inline-block' }}></span>
+              <span style={{ fontWeight: '700', color: col.text }}>{label}</span>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Map container */}
       <div

@@ -103,3 +103,13 @@ exports.getAllOccupancies = async (req, res) => {
   }
 };
 
+exports.getAllRooms = async (req, res) => {
+  try {
+    const [rooms] = await pool.query('SELECT id, name, floor, type, status, description FROM rooms ORDER BY floor, name');
+    res.json(rooms);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to retrieve rooms', error: err.message });
+  }
+};
+
+

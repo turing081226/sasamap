@@ -1,5 +1,10 @@
 const pool = require('../config/db');
 
+const getDayLabel = (day) => {
+  const days = { 1: '월', 2: '화', 3: '수', 4: '목', 5: '금' };
+  return days[day] || '';
+};
+
 exports.searchAll = async (req, res) => {
   try {
     const { q, type } = req.query;
@@ -12,75 +17,133 @@ exports.searchAll = async (req, res) => {
 
     // 1. 교사 검색
     if (searchType === 'all' || searchType === 'teacher') {
-      const [teachers] = await pool.query(
-        `SELECT DISTINCT t.teacher_name, t.subject, r.name as room_name 
+      const [rows] = await pool.query(
+        `SELECT t.teacher_name, t.subject, t.day_of_week, t.period, r.name as room_name 
          FROM timetables t 
          LEFT JOIN rooms r ON t.room_id = r.id
-         WHERE t.teacher_name LIKE ?`,
+         WHERE t.teacher_name LIKE ?
+         ORDER BY t.teacher_name, t.day_of_week, t.period`,
         [searchQuery]
       );
-      teachers.forEach(t => {
-        if (t.teacher_name) {
-          results.push({
-            id: `teacher_${t.teacher_name}_${results.length}`,
-            type: '교사',
-            title: `${t.teacher_name} 선생님`,
-            subtitle: `담당 과목: ${t.subject || '알 수 없음'}`,
-            location: t.room_name || '위치 정보 없음',
-          });
+
+      const teacherMap = {};
+      rows.forEach(row => {
+        if (!row.teacher_name) return;
+        if (!teacherMap[row.teacher_name]) {
+          teacherMap[row.teacher_name] = [];
         }
+        teacherMap[row.teacher_name].push(row);
+      });
+
+      Object.keys(teacherMap).forEach(teacherName => {
+        const slots = teacherMap[teacherName];
+        const uniqueSubjects = Array.from(new Set(slots.map(s => s.subject).filter(Boolean)));
+        
+        // Format detailed timetable schedule slots
+        const details = slots.map(s => 
+          `${getDayLabel(s.day_of_week)}요일 ${s.period}교시: ${s.subject} (${s.room_name || '장소 미지정'})`
+        );
+
+        results.push({
+          id: `teacher_${teacherName}`,
+          type: '교사',
+          title: `${teacherName} 선생님`,
+          subtitle: `담당 과목: ${uniqueSubjects.join(', ') || '없음'}`,
+          location: slots[0]?.room_name || '위치 미정',
+          details: details
+        });
       });
     }
 
     // 2. 과목 검색
     if (searchType === 'all' || searchType === 'subject') {
-      const [subjects] = await pool.query(
-        `SELECT DISTINCT t.subject, r.name as room_name, t.day_of_week, t.period 
+      const [rows] = await pool.query(
+        `SELECT t.subject, t.teacher_name, t.day_of_week, t.period, r.name as room_name 
          FROM timetables t 
          LEFT JOIN rooms r ON t.room_id = r.id
-         WHERE t.subject LIKE ?`,
+         WHERE t.subject LIKE ?
+         ORDER BY t.subject, t.day_of_week, t.period`,
         [searchQuery]
       );
-      
-      // Group by subject to avoid massive duplication
-      const groupedSubjects = {};
-      subjects.forEach(s => {
-        if (!groupedSubjects[s.subject]) {
-          groupedSubjects[s.subject] = { locations: new Set() };
+
+      const subjectMap = {};
+      rows.forEach(row => {
+        if (!row.subject) return;
+        if (!subjectMap[row.subject]) {
+          subjectMap[row.subject] = [];
         }
-        if (s.room_name) {
-          groupedSubjects[s.subject].locations.add(s.room_name);
-        }
+        subjectMap[row.subject].push(row);
       });
 
-      Object.keys(groupedSubjects).forEach((subjName, idx) => {
-        const locations = Array.from(groupedSubjects[subjName].locations).join(', ') || '지정되지 않음';
+      Object.keys(subjectMap).forEach(subjectName => {
+        const slots = subjectMap[subjectName];
+        const uniqueRooms = Array.from(new Set(slots.map(s => s.room_name).filter(Boolean)));
+        
+        // Format detailed schedule slots for subject
+        const details = slots.map(s => 
+          `${getDayLabel(s.day_of_week)}요일 ${s.period}교시: ${s.teacher_name || '교사 미지정'} 선생님 (${s.room_name || '장소 미지정'})`
+        );
+
         results.push({
-          id: `subject_${idx}`,
+          id: `subject_${subjectName}`,
           type: '과목',
-          title: subjName,
-          subtitle: `수업 교실: ${locations}`,
-          location: '-',
+          title: subjectName,
+          subtitle: `수업 교실: ${uniqueRooms.join(', ') || '지정되지 않음'}`,
+          location: uniqueRooms[0] || '-',
+          details: details
         });
       });
     }
 
     // 3. 교실 검색
     if (searchType === 'all' || searchType === 'room') {
-      const [rooms] = await pool.query(
-        `SELECT r.id, r.name, r.floor, r.status 
-         FROM rooms r 
-         WHERE r.name LIKE ?`,
+      const [rows] = await pool.query(
+        `SELECT r.id as room_id, r.name as room_name, r.floor, r.status, r.description,
+                t.subject, t.teacher_name, t.day_of_week, t.period
+         FROM rooms r
+         LEFT JOIN timetables t ON t.room_id = r.id
+         WHERE r.name LIKE ?
+         ORDER BY r.name, t.day_of_week, t.period`,
         [searchQuery]
       );
-      
-      rooms.forEach(r => {
+
+      const roomMap = {};
+      rows.forEach(row => {
+        if (!roomMap[row.room_name]) {
+          roomMap[row.room_name] = {
+            id: row.room_id,
+            name: row.room_name,
+            floor: row.floor,
+            status: row.status,
+            description: row.description,
+            slots: []
+          };
+        }
+        if (row.subject) {
+          roomMap[row.room_name].slots.push(row);
+        }
+      });
+
+      Object.keys(roomMap).forEach(roomName => {
+        const roomData = roomMap[roomName];
+        
+        const details = roomData.slots.map(s => 
+          `${getDayLabel(s.day_of_week)}요일 ${s.period}교시: ${s.subject} (${s.teacher_name || '교사 미지정'} 선생님)`
+        );
+
+        let statusText = '빈 교실';
+        if (roomData.status === 'MAINTENANCE') statusText = '점검 중';
+        else if (roomData.status === 'UNAVAILABLE') statusText = '사용 불가';
+        else if (roomData.status === 'NEEDS_APPROVAL') statusText = '승인 필요';
+        else if (roomData.status === 'IN_USE') statusText = '사용 중';
+
         results.push({
-          id: `room_${r.id}`,
+          id: `room_${roomData.id}`,
           type: '교실',
-          title: `${r.name} (${r.floor}층)`,
-          subtitle: `상태: ${r.status === 'EMPTY' ? '빈 교실' : r.status === 'IN_USE' ? '사용 중' : r.status}`,
-          location: r.name,
+          title: `${roomName} (${roomData.floor}층)`,
+          subtitle: `상태: ${statusText}${roomData.description ? ` - ${roomData.description}` : ''}`,
+          location: roomName,
+          details: details.length > 0 ? details : ['개설되거나 등록된 정규 수업 일정이 없습니다.']
         });
       });
     }

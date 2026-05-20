@@ -245,17 +245,15 @@ export default function MyPage() {
       <h1 className="title">👤 마이페이지</h1>
 
       {notif.text && (
-        <div style={{
-          position: 'fixed', top: '20px', right: '20px', zIndex: 1000,
-          padding: '0.85rem 1.5rem', borderRadius: '12px',
+        <div className="toast-popup" style={{
           background: notif.type === 'success' ? '#dcfce7' : '#fee2e2',
           border: `1px solid ${notif.type === 'success' ? '#22c55e' : '#ef4444'}`,
           color: notif.type === 'success' ? '#14532d' : '#7f1d1d',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontWeight: '600',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           display: 'flex', alignItems: 'center', gap: '8px',
-          animation: 'slideIn 0.3s ease-out',
+          animation: 'toastFade 3s ease-in-out forwards',
         }}>
-          {notif.type === 'success' ? <Check size={18} /> : <X size={18} />}
+          {notif.type === 'success' ? <Check size={14} /> : <X size={14} />}
           {notif.text}
         </div>
       )}

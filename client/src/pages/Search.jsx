@@ -104,22 +104,32 @@ export default function Search() {
         ) : (
           <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
             {results.map(item => (
-              <div key={item.id} className="tooltip-container" style={{padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', transition: 'transform 0.2s ease, box-shadow 0.2s ease'}}>
+               <div key={item.id} className="tooltip-container card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', position: 'relative' }}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                   <div>
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px'}}>
                       <span className={`badge ${getBadgeColor(item.type)}`} style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}>
                         {renderIcon(item.type)} {item.type}
                       </span>
-                      <strong style={{fontSize: '1.1rem'}}>{item.title}</strong>
+                      <strong style={{fontSize: '1.15rem', color: 'var(--text-main)'}}>{item.title}</strong>
                     </div>
-                    <p style={{marginTop: '0.5rem', color: 'var(--text-color)'}}>{item.subtitle}</p>
+                    <p style={{marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{item.subtitle}</p>
                   </div>
                 </div>
                 {/* Tooltip Content */}
                 <div className="tooltip-content">
-                  상세 정보가 여기에 표시됩니다. <br/>
-                  ({item.type} 데이터)
+                  <div style={{ fontWeight: '800', marginBottom: '0.35rem', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '0.2rem', color: '#38bdf8', fontSize: '0.78rem' }}>
+                    📅 상세 시간표 일정
+                  </div>
+                  {item.details && item.details.length > 0 ? (
+                    <ul>
+                      {item.details.map((detail, idx) => (
+                        <li key={idx} style={{ fontSize: '0.72rem' }}>{detail}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>등록된 정규 시간표 일정이 없습니다.</div>
+                  )}
                 </div>
               </div>
             ))}
