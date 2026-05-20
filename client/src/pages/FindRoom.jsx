@@ -424,7 +424,16 @@ export default function FindRoom() {
                     strokeLinejoin: 'round'
                   }}
                 >
-                  {room.name}
+                  <tspan x={room.cx} dy={room.status !== 'EMPTY' ? "-0.4em" : "0"}>{room.name}</tspan>
+                  {room.status !== 'EMPTY' && (
+                    <tspan x={room.cx} dy="1.4em" fontSize={isSVGFloor ? '11px' : '8px'} fontWeight="600">
+                      {room.status === 'CLASS' ? '수업 중' : 
+                       room.status === 'IN_USE' ? '사용 중' : 
+                       room.status === 'MAINTENANCE' ? '점검 중' : 
+                       room.status === 'NEEDS_APPROVAL' ? '승인 필요' : 
+                       room.status === 'UNAVAILABLE' ? '사용 불가' : ''}
+                    </tspan>
+                  )}
                 </text>
               </g>
             );

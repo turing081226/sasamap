@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Plus, Trash2, X, Search, Edit2, Check, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -53,12 +54,12 @@ const getDayName = (id) => DAYS.find(d => d.id === id)?.label || '';
 
 export default function Timetable() {
   const { token } = useAuth();
+  const showNotification = useToast();
   const [userTimetable, setUserTimetable] = useState([]);
   const [masterTimetable, setMasterTimetable] = useState([]);
   
   // Loading & notification states
   const [loading, setLoading] = useState(true);
-  const [notif, setNotif] = useState({ type: '', text: '' });
   const [isSaving, setIsSaving] = useState(false);
 
   // Modal control states
@@ -105,11 +106,6 @@ export default function Timetable() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const showNotification = (type, text) => {
-    setNotif({ type, text });
-    setTimeout(() => setNotif({ type: '', text: '' }), 4000);
-  };
 
   // Helper to find class in user timetable
   const findUserClass = (day, period) => {
@@ -601,70 +597,55 @@ export default function Timetable() {
         @media (max-width: 768px) {
           .timetable-table {
             min-width: unset !important;
-            border-spacing: 2px !important;
+            border-spacing: 1px !important;
           }
           .timetable-table th {
-            font-size: 0.72rem !important;
-            padding: 4px 2px !important;
+            font-size: 0.65rem !important;
+            padding: 3px 1px !important;
           }
           .timetable-table th.time-column-header {
-            width: 38px !important;
+            width: 28px !important;
+            font-size: 0.65rem !important;
           }
           .time-cell {
-            height: 52px !important;
-            padding: 2px 1px !important;
+            height: 42px !important;
+            padding: 1px !important;
           }
           .time-cell .period-number {
-            font-size: 0.95rem !important;
+            font-size: 0.85rem !important;
           }
           .time-cell .period-time {
             display: none !important;
           }
           .cell-interactive {
-            height: 52px !important;
+            height: 42px !important;
           }
           .class-block {
-            padding: 2px 3px !important;
+            padding: 1px 2px !important;
             border-radius: 4px !important;
           }
           .class-subject {
-            font-size: 0.62rem !important;
-            line-height: 1.1 !important;
+            font-size: 0.55rem !important;
+            line-height: 1.05 !important;
             -webkit-line-clamp: 2 !important;
           }
           .class-teacher {
             display: none !important;
           }
           .class-room {
-            font-size: 0.58rem !important;
+            font-size: 0.5rem !important;
             font-weight: 800 !important;
             margin-top: 1px !important;
           }
           .lunch-row-container {
-            height: 32px !important;
-            font-size: 0.72rem !important;
+            height: 24px !important;
+            font-size: 0.65rem !important;
           }
           .lunch-time-text {
-            font-size: 0.62rem !important;
-            margin-left: 4px !important;
+            display: none !important;
           }
         }
       `}</style>
-
-      {/* Global Notifications popup */}
-      {notif.text && (
-        <div className="toast-popup" style={{
-          background: notif.type === 'success' ? '#dcfce7' : '#fee2e2',
-          border: `1px solid ${notif.type === 'success' ? '#22c55e' : '#ef4444'}`,
-          color: notif.type === 'success' ? '#14532d' : '#7f1d1d',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          animation: 'toastFade 3s ease-in-out forwards',
-        }}>
-          {notif.type === 'success' ? <Check size={14} /> : <X size={14} />}
-          {notif.text}
-        </div>
-      )}
 
       {/* Header section */}
       <div className="timetable-header-row">

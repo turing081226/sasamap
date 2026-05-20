@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -51,6 +52,7 @@ const getDayName = (id) => {
 
 export default function MyPage() {
   const { user, token, logout, updateProfile } = useAuth();
+  const showNotification = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -69,7 +71,6 @@ export default function MyPage() {
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [notif, setNotif] = useState({ type: '', text: '' });
 
   // Fetch my occupancies
   const fetchMyOccupancies = async () => {
@@ -199,10 +200,6 @@ export default function MyPage() {
     }
   };
 
-  const showNotification = (type, text) => {
-    setNotif({ type, text });
-    setTimeout(() => setNotif({ type: '', text: '' }), 4000);
-  };
 
   const isCurrentTime = (day, period) => {
     const now = new Date();
@@ -243,20 +240,6 @@ export default function MyPage() {
   return (
     <div>
       <h1 className="title">👤 마이페이지</h1>
-
-      {notif.text && (
-        <div className="toast-popup" style={{
-          background: notif.type === 'success' ? '#dcfce7' : '#fee2e2',
-          border: `1px solid ${notif.type === 'success' ? '#22c55e' : '#ef4444'}`,
-          color: notif.type === 'success' ? '#14532d' : '#7f1d1d',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          animation: 'toastFade 3s ease-in-out forwards',
-        }}>
-          {notif.type === 'success' ? <Check size={14} /> : <X size={14} />}
-          {notif.text}
-        </div>
-      )}
 
       <div className="grid" style={{ gap: '1.5rem' }}>
         {/* Profile Card */}
