@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "install": "cd client && npm install",
+    "build": "cd client && npm run build"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
