@@ -56,7 +56,7 @@ export const floorData = {
     ]
   },
   3: {
-    viewBox: "0 0 500 320",
+    viewBox: "450 650 1150 800",
     bgImage: "/3F_bg.jpg",
     rooms: [
         {
@@ -239,7 +239,7 @@ export const floorData = {
     ]
   },
   4: {
-    viewBox: "0 0 500 320",
+    viewBox: "450 650 1150 800",
     bgImage: "/4F_bg.jpg",
     rooms: [
         {
@@ -428,7 +428,7 @@ export const floorData = {
     ]
   },
   5: {
-    viewBox: "0 0 500 320",
+    viewBox: "450 650 1150 800",
     bgImage: "/5F_bg.jpg",
     rooms: [
         {
