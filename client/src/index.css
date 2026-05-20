@@ -390,7 +390,8 @@ body {
 
 @media (max-width: 768px) {
   .home-grid {
-    gap: 0.35rem !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
   }
   .home-card {
     padding: 0.75rem 0.4rem !important;

@@ -10,12 +10,14 @@ const adminRoutes = require('./routes/admin.routes');
 const roomRoutes = require('./routes/room.routes');
 const searchRoutes = require('./routes/search.routes');
 const mypageRoutes = require('./routes/mypage.routes');
+const friendRoutes = require('./routes/friend.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/mypage', mypageRoutes);
+app.use('/api/friends', friendRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {
