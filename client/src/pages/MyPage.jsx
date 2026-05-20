@@ -385,193 +385,178 @@ export default function MyPage() {
           )}
         </div>
 
-        {/* 내 위치 공유 신규 카드 (Premium Glassmorphism & Gradient Accent) */}
-        <div className="card" style={{ gridColumn: '1 / -1', position: 'relative', overflow: 'hidden' }}>
+        {/* 내 위치 등록 카드 (Compact Grid Card) */}
+        <div className="card" style={{ position: 'relative', overflow: 'hidden' }}>
           {/* Decorative background blur shape */}
           <div style={{
-            position: 'absolute', top: '-100px', right: '-100px', width: '250px', height: '250px',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(255,255,255,0) 70%)',
+            position: 'absolute', top: '-100px', right: '-100px', width: '200px', height: '200px',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(255,255,255,0) 70%)',
             borderRadius: '50%', pointerEvents: 'none'
           }} />
 
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#1e293b' }}>
-            <MapPin size={22} color="var(--primary)" /> 📍 실시간 내 위치 공유
+          <h2 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b' }}>
+            <MapPin size={18} color="var(--primary)" /> 📍 내 위치 등록
           </h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-            자신이 머물고 있는(또는 머물 예정인) 교실과 교시를 선택하여 다른 사람들에게 공유해보세요.<br />
-            <strong>시간표에 수업이 있거나 이미 타인이 선점한 교실은 선택 목록에 노출되지 않습니다.</strong>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.85rem', lineHeight: '1.4' }}>
+            공강 시간에 머무는 교실을 등록하여 친구들과 실시간 위치를 공유해보세요.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-            {/* 위치 공유 폼 */}
-            <div style={{
-              background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem',
-              display: 'flex', flexDirection: 'column', gap: '1.25rem'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#475569', margin: 0 }}>📍 위치 공유 예약 등록</h3>
-              
-              {/* 1. 요일 선택 */}
+          {/* 등록 폼 */}
+          <div style={{
+            background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem',
+            display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem'
+          }}>
+            {/* 요일 & 교시 선택 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
               <div>
-                <label style={{ ...labelStyle, fontSize: '0.85rem' }}>요일 선택</label>
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
+                <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.2rem' }}>요일</label>
+                <select
+                  value={selectedDay}
+                  onChange={e => setSelectedDay(parseInt(e.target.value, 10))}
+                  style={{
+                    ...inputStyle, background: 'white', cursor: 'pointer', fontWeight: '600', color: '#1e293b',
+                    border: '1px solid #cbd5e1', padding: '0.4rem 0.6rem', fontSize: '0.875rem'
+                  }}
+                >
                   {DAYS.map(day => (
-                    <button
-                      key={day.id}
-                      onClick={() => setSelectedDay(day.id)}
+                    <option key={day.id} value={day.id}>{day.label}요일</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.2rem' }}>교시</label>
+                <select
+                  value={selectedPeriod}
+                  onChange={e => setSelectedPeriod(parseInt(e.target.value, 10))}
+                  style={{
+                    ...inputStyle, background: 'white', cursor: 'pointer', fontWeight: '600', color: '#1e293b',
+                    border: '1px solid #cbd5e1', padding: '0.4rem 0.6rem', fontSize: '0.875rem'
+                  }}
+                >
+                  {PERIODS.map(p => (
+                    <option key={p.id} value={p.id}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* 교실 선택 */}
+            <div>
+              <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.2rem' }}>머무는 교실</label>
+              <select
+                value={selectedRoomId}
+                onChange={e => setSelectedRoomId(e.target.value)}
+                disabled={loadingAvailable || availableRooms.length === 0}
+                style={{
+                  ...inputStyle, background: 'white', cursor: availableRooms.length > 0 ? 'pointer' : 'not-allowed',
+                  fontWeight: '700', color: '#1e293b', border: '1px solid #cbd5e1',
+                  padding: '0.4rem 0.6rem', fontSize: '0.875rem'
+                }}
+              >
+                {loadingAvailable ? (
+                  <option>조회 중...</option>
+                ) : availableRooms.length > 0 ? (
+                  availableRooms.map(room => (
+                    <option key={room.id} value={room.id}>
+                      {room.name} ({room.floor}층)
+                    </option>
+                  ))
+                ) : (
+                  <option>비어있는 교실 없음 ❌</option>
+                )}
+              </select>
+            </div>
+
+            {/* 등록 버튼 */}
+            <button
+              onClick={handleRegisterOccupancy}
+              disabled={submitting || !selectedRoomId}
+              style={{
+                width: '100%', padding: '0.55rem', borderRadius: '8px', border: 'none',
+                background: !selectedRoomId
+                  ? '#cbd5e1'
+                  : isCurrent
+                    ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+                    : 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                color: 'white', fontWeight: '700', fontSize: '0.9rem', cursor: !selectedRoomId ? 'not-allowed' : 'pointer',
+                boxShadow: selectedRoomId ? '0 2px 5px rgba(0,0,0,0.05)' : 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                transition: 'transform 0.1s ease, filter 0.2s ease',
+              }}
+              onMouseDown={e => { if (selectedRoomId) e.currentTarget.style.transform = 'scale(0.98)'; }}
+              onMouseUp={e => { if (selectedRoomId) e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              {submitting ? (
+                '등록 중...'
+              ) : isCurrent ? (
+                <>📍 나 지금 여기에 있어요 (등록)</>
+              ) : (
+                <>📅 나 이때 여기에 있을게요 (예약)</>
+              )}
+            </button>
+          </div>
+
+          {/* 내 위치 등록 내역 */}
+          <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Clock size={14} /> 내 위치 등록 내역 ({occupancies.length})
+            </h3>
+            {occupancies.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px' }}>
+                {occupancies.map(occ => {
+                  const occIsCurrent = isCurrentTime(occ.day_of_week, occ.period);
+                  return (
+                    <div
+                      key={occ.id}
                       style={{
-                        flex: 1, minWidth: '50px', padding: '0.6rem 0.2rem', borderRadius: '8px',
-                        fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', border: 'none',
-                        background: selectedDay === day.id ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : '#e2e8f0',
-                        color: selectedDay === day.id ? 'white' : '#475569',
-                        boxShadow: selectedDay === day.id ? '0 3px 6px rgba(37,99,235,0.15)' : 'none',
-                        transition: 'all 0.2s ease-out'
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '0.5rem 0.65rem', borderRadius: '8px', background: '#f8fafc',
+                        border: `1px solid ${occIsCurrent ? '#fca5a5' : '#e2e8f0'}`,
+                        transition: 'all 0.2s'
                       }}
                     >
-                      {day.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2. 교시 선택 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ ...labelStyle, fontSize: '0.85rem' }}>교시 선택</label>
-                  <select
-                    value={selectedPeriod}
-                    onChange={e => setSelectedPeriod(parseInt(e.target.value, 10))}
-                    style={{
-                      ...inputStyle, background: 'white', cursor: 'pointer', fontWeight: '600', color: '#1e293b',
-                      border: '1.5px solid #cbd5e1'
-                    }}
-                  >
-                    {PERIODS.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.label} ({p.time})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 3. 교실 선택 (필터링된 방) */}
-                <div>
-                  <label style={{ ...labelStyle, fontSize: '0.85rem' }}>빈 교실 선택</label>
-                  <select
-                    value={selectedRoomId}
-                    onChange={e => setSelectedRoomId(e.target.value)}
-                    disabled={loadingAvailable || availableRooms.length === 0}
-                    style={{
-                      ...inputStyle, background: 'white', cursor: availableRooms.length > 0 ? 'pointer' : 'not-allowed',
-                      fontWeight: '700', color: '#1e293b', border: '1.5px solid #cbd5e1'
-                    }}
-                  >
-                    {loadingAvailable ? (
-                      <option>조회 중...</option>
-                    ) : availableRooms.length > 0 ? (
-                      availableRooms.map(room => (
-                        <option key={room.id} value={room.id}>
-                          {room.name} ({room.floor}층)
-                        </option>
-                      ))
-                    ) : (
-                      <option>비어있는 교실 없음 ❌</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* 4. 등록 버튼 */}
-              <button
-                onClick={handleRegisterOccupancy}
-                disabled={submitting || !selectedRoomId}
-                style={{
-                  width: '100%', padding: '0.75rem', borderRadius: '10px', border: 'none',
-                  background: !selectedRoomId
-                    ? '#cbd5e1'
-                    : isCurrent
-                      ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                      : 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                  color: 'white', fontWeight: '700', fontSize: '1rem', cursor: !selectedRoomId ? 'not-allowed' : 'pointer',
-                  boxShadow: selectedRoomId ? '0 4px 10px rgba(0,0,0,0.1)' : 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                  transition: 'transform 0.1s ease, filter 0.2s ease',
-                }}
-                onMouseDown={e => { if (selectedRoomId) e.currentTarget.style.transform = 'scale(0.98)'; }}
-                onMouseUp={e => { if (selectedRoomId) e.currentTarget.style.transform = 'scale(1)'; }}
-              >
-                {submitting ? (
-                  '등록 중...'
-                ) : isCurrent ? (
-                  <>📍 나 지금 여기에 있어요 (등록)</>
-                ) : (
-                  <>📅 나 이때 여기에 있을게요 (예약)</>
-                )}
-              </button>
-            </div>
-
-            {/* 공유 목록 피드 */}
-            <div>
-              <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#475569', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Clock size={16} /> 내 위치 공유 내역 ({occupancies.length})
-              </h3>
-              {occupancies.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {occupancies.map(occ => {
-                    const occIsCurrent = isCurrentTime(occ.day_of_week, occ.period);
-                    return (
-                      <div
-                        key={occ.id}
-                        style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          padding: '0.75rem 1rem', borderRadius: '10px', background: '#f8fafc',
-                          border: `1.5px solid ${occIsCurrent ? '#fca5a5' : '#cbd5e1'}`,
-                          boxShadow: occIsCurrent ? '0 2px 6px rgba(239,68,68,0.06)' : 'none',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          {/* Badge */}
-                          <span style={{
-                            padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
-                            background: occIsCurrent ? '#fee2e2' : '#dbeafe',
-                            color: occIsCurrent ? '#dc2626' : '#1e40af',
-                            display: 'flex', alignItems: 'center', gap: '3px'
-                          }}>
-                            {occIsCurrent ? '📍 여기에 있어요' : '📅 여기에 있을게요'}
-                          </span>
-                          <span style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.95rem' }}>
-                            {occ.room_name} ({occ.floor}층)
-                          </span>
-                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                            | {getDayName(occ.day_of_week)}요일 {occ.period}교시
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => handleCancelOccupancy(occ.id)}
-                          style={{
-                            background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer',
-                            padding: '4px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.background = '#fee2e2'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        {/* Status Badge */}
+                        <span style={{
+                          padding: '0.1rem 0.35rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700',
+                          background: occIsCurrent ? '#fee2e2' : '#dbeafe',
+                          color: occIsCurrent ? '#dc2626' : '#1e40af',
+                        }}>
+                          {occIsCurrent ? '현재' : '예약'}
+                        </span>
+                        <span style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.85rem' }}>
+                          {occ.room_name} ({occ.floor}층)
+                        </span>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                          {getDayName(occ.day_of_week)}요일 {occ.period}교시
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{
-                  padding: '2rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc',
-                  border: '1.5px dashed #cbd5e1', borderRadius: '12px'
-                }}>
-                  등록된 공유 위치 정보가 없습니다.<br />
-                  상단의 예약 등록을 통해 위치 정보를 입력하여 다른 친구들에게 공유해보세요! 🚀
-                </div>
-              )}
-            </div>
+                      <button
+                        onClick={() => handleCancelOccupancy(occ.id)}
+                        style={{
+                          background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer',
+                          padding: '2px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#fee2e2'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{
+                padding: '1.25rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc',
+                border: '1px dashed #cbd5e1', borderRadius: '8px', fontSize: '0.8rem', lineHeight: '1.4'
+              }}>
+                등록된 위치 정보가 없습니다.<br />
+                위 폼에서 내 위치를 등록해 보세요! 🚀
+              </div>
+            )}
           </div>
         </div>
 

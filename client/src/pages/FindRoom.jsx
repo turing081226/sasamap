@@ -123,16 +123,23 @@ export default function FindRoom() {
       }
 
       // 2. User Voluntary Occupancy (IN_USE)
-      const activeOccupancy = occupancies.find(occ =>
+      const roomOccupancies = occupancies.filter(occ =>
         (occ.room_name === room.name || occ.room_id === room.id) &&
         occ.day_of_week === currentDay &&
         occ.period === currentPeriod
       );
-      if (activeOccupancy) {
+      if (roomOccupancies.length > 0) {
+        let currentText = '';
+        if (roomOccupancies.length <= 3) {
+          currentText = roomOccupancies.map(occ => occ.user_name).join(', ') + '님 사용 중';
+        } else {
+          const topNames = roomOccupancies.slice(0, 2).map(occ => occ.user_name).join(', ');
+          currentText = `${topNames} 외 ${roomOccupancies.length - 2}명 사용 중`;
+        }
         return {
           ...room,
           status: 'IN_USE',
-          current: `${activeOccupancy.user_name}님 사용 중`
+          current: currentText
         };
       }
     }

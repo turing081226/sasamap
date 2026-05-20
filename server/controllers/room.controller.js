@@ -66,7 +66,6 @@ exports.getAvailableRooms = async (req, res) => {
     // Get rooms that:
     // 1. Are not in maintenance
     // 2. Do not have a regular class at that day and period
-    // 3. Are not occupied by any user at that day and period
     const [rooms] = await pool.query(`
       SELECT id, name, floor, type, description 
       FROM rooms 
@@ -75,12 +74,8 @@ exports.getAvailableRooms = async (req, res) => {
           SELECT room_id FROM timetables 
           WHERE day_of_week = ? AND period = ? AND room_id IS NOT NULL
         )
-        AND id NOT IN (
-          SELECT room_id FROM user_occupancies 
-          WHERE day_of_week = ? AND period = ?
-        )
       ORDER BY name ASC
-    `, [dayVal, periodVal, dayVal, periodVal]);
+    `, [dayVal, periodVal]);
 
     res.json(rooms);
   } catch (err) {
