@@ -23,4 +23,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error' });
 });
 
-app.listen(process.env.PORT || 3001, () => console.log('서버 실행중, 포트:', process.env.PORT || 3001));
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(process.env.PORT || 3001, () => console.log('서버 실행중, 포트:', process.env.PORT || 3001));
+}
+
+module.exports = app;
