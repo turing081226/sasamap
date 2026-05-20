@@ -4,11 +4,12 @@ import Home from './pages/Home';
 import FindRoom from './pages/FindRoom';
 import Search from './pages/Search';
 import MyPage from './pages/MyPage';
+import Timetable from './pages/Timetable';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './contexts/AuthContext';
-import { Home as HomeIcon, Compass, Search as SearchIcon, User, Shield } from 'lucide-react';
+import { Home as HomeIcon, Compass, Search as SearchIcon, User, Shield, Calendar } from 'lucide-react';
 import logo from './assets/logo.png';
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
               <NavItem to="/" icon={HomeIcon} text="홈" />
               <NavItem to="/find-room" icon={Compass} text="교실찾기" />
               <NavItem to="/search" icon={SearchIcon} text="검색" />
+              <NavItem to="/timetable" icon={Calendar} text="시간표" />
               <NavItem to="/mypage" icon={User} text="마이페이지" />
               {isAdmin && <NavItem to="/admin" icon={Shield} text="관리자" />}
             </div>
@@ -82,6 +84,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/find-room" element={<ProtectedRoute><FindRoom /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+          <Route path="/timetable" element={<ProtectedRoute><Timetable /></ProtectedRoute>} />
           <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
         </Routes>

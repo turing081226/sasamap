@@ -559,33 +559,6 @@ export default function MyPage() {
             )}
           </div>
         </div>
-
-        {/* 시간표 (기존 카드 유지) */}
-        <div className="card">
-          <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Calendar size={20} color="var(--primary)" /> 내 시간표
-          </h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-            이번 주 나의 특별활동 및 수업 시간표를 관리하세요.
-          </p>
-          <button className="btn" style={{ width: '100%' }}>시간표 조회/수정</button>
-        </div>
-
-        {/* 알림 설정 (기존 카드 유지) */}
-        <div className="card">
-          <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Bell size={20} color="var(--primary)" /> 알림 설정
-          </h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-            수업 시작 전 알림을 받을 시간을 설정합니다.
-          </p>
-          <select style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-            <option>수업 5분 전</option>
-            <option>수업 10분 전</option>
-            <option>수업 30분 전</option>
-          </select>
-          <button className="btn" style={{ width: '100%' }}>저장 완료</button>
-        </div>
       </div>
     </div>
   );
