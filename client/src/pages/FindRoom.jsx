@@ -330,13 +330,14 @@ export default function FindRoom() {
                   y={room.cy}
                   dominantBaseline="middle"
                   textAnchor="middle"
-                  fontSize={isSVGFloor ? '15px' : '11px'}
+                  fontSize={isSVGFloor ? '16px' : '11px'}
                   fontWeight="800"
                   fill={col.text}
-                  stroke="#ffffff"
-                  strokeWidth="3.5px"
-                  paintOrder="stroke font"
-                  style={{ pointerEvents: 'none', userSelect: 'none' }}
+                  style={{ 
+                    pointerEvents: 'none', 
+                    userSelect: 'none',
+                    textShadow: '0 0 3px #ffffff, 0 0 3px #ffffff, 0 0 3px #ffffff'
+                  }}
                 >
                   {room.name}
                 </text>
