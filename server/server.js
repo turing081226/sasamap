@@ -17,6 +17,25 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/mypage', mypageRoutes);
 
+app.get('/api/health', async (req, res) => {
+  try {
+    const pool = require('./config/db');
+    const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
+    const [rooms] = await pool.query('SELECT COUNT(*) as count FROM rooms');
+    const [timetables] = await pool.query('SELECT COUNT(*) as count FROM timetables');
+    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || 'NONE';
+    res.json({
+      status: 'ok',
+      db_connected: true,
+      db_url_prefix: dbUrl.substring(0, 15) + '...',
+      users_count: users[0].count,
+      rooms_count: rooms[0].count,
+      timetables_count: timetables[0].count
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message, stack: err.stack });
+  }
+});
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
