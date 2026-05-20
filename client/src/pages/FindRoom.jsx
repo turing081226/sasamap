@@ -333,10 +333,13 @@ export default function FindRoom() {
                   fontSize={isSVGFloor ? '16px' : '11px'}
                   fontWeight="800"
                   fill={col.text}
+                  stroke="#ffffff"
+                  strokeWidth={isSVGFloor ? 3 : 1.5}
                   style={{ 
                     pointerEvents: 'none', 
                     userSelect: 'none',
-                    textShadow: '0 0 3px #ffffff, 0 0 3px #ffffff, 0 0 3px #ffffff'
+                    paintOrder: 'stroke fill',
+                    strokeLinejoin: 'round'
                   }}
                 >
                   {room.name}
