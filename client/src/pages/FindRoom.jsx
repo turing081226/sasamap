@@ -46,6 +46,7 @@ export default function FindRoom() {
   const [floor, setFloor] = useState(1);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [timetables, setTimetables] = useState([]);
+  const [occupancies, setOccupancies] = useState([]);
   const [currentPeriod, setCurrentPeriod] = useState(getCurrentPeriod());
 
   // Pan & Zoom state
@@ -69,11 +70,28 @@ export default function FindRoom() {
         console.error('Failed to fetch timetables', err);
       }
     };
-    fetchTimetables();
 
-    // Check time every minute
+    // Fetch all user occupancies for real-time occupancy status
+    const fetchOccupancies = async () => {
+      try {
+        const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${API}/rooms/occupancies`);
+        if (res.ok) {
+          const data = await res.json();
+          setOccupancies(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch occupancies', err);
+      }
+    };
+
+    fetchTimetables();
+    fetchOccupancies();
+
+    // Check time and fetch occupancies every minute
     const interval = setInterval(() => {
       setCurrentPeriod(getCurrentPeriod());
+      fetchOccupancies();
     }, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -88,8 +106,9 @@ export default function FindRoom() {
     // Keep maintenance state statically
     if (room.status === 'MAINTENANCE') return room;
     
-    // Check if there is an active class right now
+    // Check if there is an active class or user occupancy right now
     if (currentDay >= 1 && currentDay <= 5 && currentPeriod) {
+      // 1. Regular Timetable Class (CLASS)
       const activeClass = timetables.find(t => 
         (t.room_name === room.name || t.room_id === room.id) && 
         t.day_of_week === currentDay && 
@@ -98,8 +117,22 @@ export default function FindRoom() {
       if (activeClass) {
         return { 
           ...room, 
-          status: 'IN_USE', 
-          current: `${activeClass.subject} (${activeClass.teacher_name})` 
+          status: 'CLASS', 
+          current: `${activeClass.subject} (${activeClass.teacher_name || '교사 미지정'})` 
+        };
+      }
+
+      // 2. User Voluntary Occupancy (IN_USE)
+      const activeOccupancy = occupancies.find(occ =>
+        (occ.room_name === room.name || occ.room_id === room.id) &&
+        occ.day_of_week === currentDay &&
+        occ.period === currentPeriod
+      );
+      if (activeOccupancy) {
+        return {
+          ...room,
+          status: 'IN_USE',
+          current: `${activeOccupancy.user_name}님 사용 중`
         };
       }
     }
@@ -297,9 +330,12 @@ export default function FindRoom() {
                   y={room.cy}
                   dominantBaseline="middle"
                   textAnchor="middle"
-                  fontSize={isSVGFloor ? '16px' : '11px'}
-                  fontWeight="700"
+                  fontSize={isSVGFloor ? '15px' : '11px'}
+                  fontWeight="800"
                   fill={col.text}
+                  stroke="#ffffff"
+                  strokeWidth="3.5px"
+                  paintOrder="stroke font"
                   style={{ pointerEvents: 'none', userSelect: 'none' }}
                 >
                   {room.name}

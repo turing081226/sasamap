@@ -1,4 +1,5 @@
 
+DROP TABLE IF EXISTS user_occupancies CASCADE;
 DROP TABLE IF EXISTS user_timetables CASCADE;
 DROP TABLE IF EXISTS user_plans CASCADE;
 DROP TABLE IF EXISTS user_notifications CASCADE;
@@ -57,6 +58,18 @@ CREATE TABLE user_timetables (
   subject VARCHAR(100) DEFAULT NULL,
   room_name VARCHAR(100) DEFAULT NULL
 );
+
+CREATE TABLE user_occupancies (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  room_id INT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+  day_of_week INT NOT NULL,         -- 1(월) ~ 5(금)
+  period INT NOT NULL,              -- 1 ~ 9교시
+  occupy_type VARCHAR(20) NOT NULL, -- 'CURRENT' (여기 있어요) 또는 'FUTURE' (여기 있을거에요)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, day_of_week, period)
+);
+
 INSERT INTO users (id, email, name, role, created_at) VALUES 
 (1, 'woolrabit77@sasa.hs.kr', '관리자', 'ADMIN', '2026-05-10T06:27:14.000Z'),
 (2, 'test@sasa.hs.kr', 'test', 'USER', '2026-05-10T06:36:43.000Z'),

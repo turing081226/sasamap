@@ -10,4 +10,9 @@ router.post('/timetable', mypageController.updateMyTimetable);
 router.post('/plan', mypageController.createPlan);
 router.post('/notification', mypageController.setNotification);
 
+// User location occupancy routes
+router.get('/occupancy', mypageController.getMyOccupancy);
+router.post('/occupancy', mypageController.occupyRoom);
+router.delete('/occupancy/:id', mypageController.cancelOccupancy);
+
 module.exports = router;

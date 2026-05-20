@@ -52,3 +52,54 @@ exports.getAllTimetables = async (req, res) => {
     res.status(500).json({ message: 'Error', error: err.message });
   }
 };
+
+exports.getAvailableRooms = async (req, res) => {
+  try {
+    const { day_of_week, period } = req.query;
+    if (!day_of_week || !period) {
+      return res.status(400).json({ message: 'day_of_week and period are required' });
+    }
+
+    const dayVal = parseInt(day_of_week, 10);
+    const periodVal = parseInt(period, 10);
+
+    // Get rooms that:
+    // 1. Are not in maintenance
+    // 2. Do not have a regular class at that day and period
+    // 3. Are not occupied by any user at that day and period
+    const [rooms] = await pool.query(`
+      SELECT id, name, floor, type, description 
+      FROM rooms 
+      WHERE status != 'MAINTENANCE'
+        AND id NOT IN (
+          SELECT room_id FROM timetables 
+          WHERE day_of_week = ? AND period = ? AND room_id IS NOT NULL
+        )
+        AND id NOT IN (
+          SELECT room_id FROM user_occupancies 
+          WHERE day_of_week = ? AND period = ?
+        )
+      ORDER BY name ASC
+    `, [dayVal, periodVal, dayVal, periodVal]);
+
+    res.json(rooms);
+  } catch (err) {
+    res.status(500).json({ message: 'Error retrieving available rooms', error: err.message });
+  }
+};
+
+exports.getAllOccupancies = async (req, res) => {
+  try {
+    const [occupancies] = await pool.query(`
+      SELECT uo.id, uo.user_id, uo.room_id, uo.day_of_week, uo.period, uo.occupy_type, uo.created_at,
+             u.name AS user_name, r.name AS room_name
+      FROM user_occupancies uo
+      JOIN users u ON uo.user_id = u.id
+      JOIN rooms r ON uo.room_id = r.id
+    `);
+    res.json(occupancies);
+  } catch (err) {
+    res.status(500).json({ message: 'Error retrieving occupancies', error: err.message });
+  }
+};
+
