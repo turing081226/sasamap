@@ -29,5 +29,5 @@ const header = floorDataContent.substring(0, index);
 
 const newContent = `${header}${generateFloorString(3, f3)},\n${generateFloorString(4, f4)},\n${generateFloorString(5, f5)}\n};\n`;
 
-fs.writeFileSync(floorDataPath, newContent);
-console.log('Successfully updated floorData.js with computed floors 3, 4, 5!');
+fs.writeFileSync(floorDataPath, newContent, 'utf8');
+console.log('Successfully updated floorData.js with computed floors 3, 4, 5 and UTF-8 encoding!');

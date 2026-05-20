@@ -129,46 +129,68 @@ export default function FindRoom() {
   };
   const onMouseUp = () => { isPanning.current = false; };
 
-  // ---------- Touch events ----------
+  // ---------- Touch & Wheel manual listeners (non-passive) ----------
   const lastTouchDist = useRef(null);
-  const onTouchStart = (e) => {
-    if (e.touches.length === 1) {
-      isPanning.current = true;
-      lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
-    if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      lastTouchDist.current = Math.hypot(dx, dy);
-    }
-  };
-  const onTouchMove = (e) => {
-    e.preventDefault();
-    if (e.touches.length === 1 && isPanning.current) {
-      const dx = e.touches[0].clientX - lastPos.current.x;
-      const dy = e.touches[0].clientY - lastPos.current.y;
-      lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
-    }
-    if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      if (lastTouchDist.current) {
-        const ratio = dist / lastTouchDist.current;
-        setScale(prev => Math.min(3, Math.max(0.5, prev * ratio)));
-      }
-      lastTouchDist.current = dist;
-    }
-  };
-  const onTouchEnd = () => { isPanning.current = false; lastTouchDist.current = null; };
 
-  // ---------- Wheel zoom ----------
-  const onWheel = (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setScale(prev => Math.min(3, Math.max(0.5, prev * delta)));
-  };
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      setScale(prev => Math.min(3, Math.max(0.5, prev * delta)));
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        isPanning.current = true;
+        lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastTouchDist.current = Math.hypot(dx, dy);
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1 && isPanning.current) {
+        const dx = e.touches[0].clientX - lastPos.current.x;
+        const dy = e.touches[0].clientY - lastPos.current.y;
+        lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+      }
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        if (lastTouchDist.current) {
+          const ratio = dist / lastTouchDist.current;
+          setScale(prev => Math.min(3, Math.max(0.5, prev * ratio)));
+        }
+        lastTouchDist.current = dist;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isPanning.current = false;
+      lastTouchDist.current = null;
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   // ---------- Click on room ----------
   const handleRoomClick = (e, room) => {
@@ -187,10 +209,6 @@ export default function FindRoom() {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onWheel={onWheel}
         style={{
           width: '100%',
           height: '400px',
@@ -274,18 +292,18 @@ export default function FindRoom() {
                     fill={col.fill} stroke={isSelected ? '#1d4ed8' : col.stroke} strokeWidth={strokeWidth}
                   />
                 )}
-                <foreignObject 
-                  x={room.cx - 25} 
-                  y={room.cy - 10} 
-                  width="50" 
-                  height="20"
-                  style={{ pointerEvents: 'none' }}
+                <text
+                  x={room.cx}
+                  y={room.cy}
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  fontSize={isSVGFloor ? '16px' : '11px'}
+                  fontWeight="700"
+                  fill={col.text}
+                  style={{ pointerEvents: 'none', userSelect: 'none' }}
                 >
-                  <div xmlns="http://www.w3.org/1999/xhtml"
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <span style={{ fontSize: isSVGFloor ? '16px' : '11px', fontWeight: '700', color: col.text, textAlign: 'center', lineHeight: 1.2 }}>{room.name}</span>
-                  </div>
-                </foreignObject>
+                  {room.name}
+                </text>
               </g>
             );
           })}
