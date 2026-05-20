@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check } from 'lucide-react';
+import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -72,6 +72,12 @@ export default function MyPage() {
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Friends states
+  const [friends, setFriends] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendEmail, setFriendEmail] = useState('');
+  const [friendLoading, setFriendLoading] = useState(false);
+
   // Fetch my occupancies
   const fetchMyOccupancies = async () => {
     if (!token) return;
@@ -114,7 +120,72 @@ export default function MyPage() {
 
   useEffect(() => {
     fetchMyOccupancies();
+    fetchFriends();
+    fetchFriendRequests();
   }, [token]);
+
+  const fetchFriends = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/friends`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setFriends(data);
+      }
+    } catch (err) { console.error('Failed to fetch friends', err); }
+  };
+
+  const fetchFriendRequests = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/friends/requests`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setFriendRequests(data);
+      }
+    } catch (err) { console.error('Failed to fetch friend requests', err); }
+  };
+
+  const handleRequestFriend = async () => {
+    if (!friendEmail.trim()) { showNotification('error', '이메일을 입력해주세요.'); return; }
+    setFriendLoading(true);
+    try {
+      const res = await fetch(`${API}/friends/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ email: friendEmail.trim() })
+      });
+      const data = await res.json();
+      if (res.ok) { showNotification('success', data.message); setFriendEmail(''); }
+      else { showNotification('error', data.message); }
+    } catch (err) { showNotification('error', '친구 신청 중 오류 발생'); }
+    finally { setFriendLoading(false); }
+  };
+
+  const handleAcceptFriend = async (id) => {
+    try {
+      const res = await fetch(`${API}/friends/accept/${id}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) { showNotification('success', data.message); fetchFriends(); fetchFriendRequests(); }
+      else { showNotification('error', data.message); }
+    } catch (err) { showNotification('error', '요청 수락 중 오류 발생'); }
+  };
+
+  const handleDeleteFriend = async (id) => {
+    if (!window.confirm('정말로 삭제/거절하시겠습니까?')) return;
+    try {
+      const res = await fetch(`${API}/friends/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) { showNotification('success', data.message); fetchFriends(); fetchFriendRequests(); }
+      else { showNotification('error', data.message); }
+    } catch (err) { showNotification('error', '삭제 중 오류 발생'); }
+  };
 
   useEffect(() => {
     fetchAvailableRooms(selectedDay, selectedPeriod);
