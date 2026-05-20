@@ -2,17 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 
 import { floorData } from './floorData';
-import { useState, useRef, useEffect } from 'react';
-import { MapPin } from 'lucide-react';
-
-import { floorData } from './floorData';
-
-// 층별 SVG 지도 파일 import 추가
-import bg1F from '../assets/1F.svg';
-import bg2F from '../assets/2F.svg';
-import bg3F from '../assets/3F.svg';
-import bg4F from '../assets/4F.svg';
-import bg5F from '../assets/5F.svg';
 
 const statusColor = {
   IN_USE:         { fill: '#fee2e2', stroke: '#ef4444', text: '#991b1b' }, // Red (사용 중)
@@ -228,25 +217,23 @@ export default function FindRoom() {
             transition: 'none',
           }}
         >
-          {/* href 부분을 import한 변수명으로 변경합니다 */}
           {floor === 1 && (
-            <image href={bg1F} width="2564" height="2788" transform="translate(329.92 47.83) scale(.48)" />
+            <image href="/1F_bg.jpg" width="2564" height="2788" transform="translate(329.92 47.83) scale(.48)" />
           )}
           {floor === 2 && (
-            <image href={bg2F} width="2612" height="2760" transform="translate(318.5 51.6) scale(.5)" />
+            <image href="/2F_bg.jpg" width="2612" height="2760" transform="translate(318.5 51.6) scale(.5)" />
           )}
           {floor === 3 && (
-            <image href={bg3F} width="2564" height="2736" transform="translate(359.4 88.26) scale(.48)" />
+            <image href="/3F_bg.jpg" width="2564" height="2736" transform="translate(359.4 88.26) scale(.48)" />
           )}
           {floor === 4 && (
-            <image href={bg4F} width="2592" height="2760" transform="translate(366.15 84.68) scale(.48)" />
+            <image href="/4F_bg.jpg" width="2592" height="2760" transform="translate(366.15 84.68) scale(.48)" />
           )}
           {floor === 5 && (
-            <image href={bg5F} width="2540" height="2752" transform="translate(361.13 86.7) scale(.48)" />
+            <image href="/5F_bg.jpg" width="2540" height="2752" transform="translate(361.13 86.7) scale(.48)" />
           )}
 
           {floor !== 1 && floor !== 2 && floor !== 3 && floor !== 4 && floor !== 5 && (
-            // ... 기존 복도/아웃라인 코드 유지 ...
             <>
               {/* Floor outline */}
               <rect x="40" y="30" width={MAP_W - 80} height={MAP_H - 60}
