@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MapPin } from 'lucide-react';
+import { Search, Loader2, Compass, MapPin } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 import { floorData } from './floorData';
@@ -275,7 +275,9 @@ export default function FindRoom() {
 
   return (
     <div>
-      <h1 className="title" style={{ marginBottom: '0.75rem' }}>🏫 교실 찾기</h1>
+      <h1 className="title" style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Compass size={28} color="var(--primary)" /> 교실 찾기
+      </h1>
 
       {/* Map container */}
       <div

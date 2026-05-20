@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle } from 'lucide-react';
+import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -278,7 +278,9 @@ export default function MyPage() {
 
   return (
     <div>
-      <h1 className="title">👤 마이페이지</h1>
+      <h1 className="title" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <User size={28} color="var(--primary)" /> 마이페이지
+      </h1>
 
       <div className="grid" style={{ gap: '1.5rem' }}>
         {/* Profile Card */}

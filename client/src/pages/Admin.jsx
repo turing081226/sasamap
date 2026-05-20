@@ -86,7 +86,9 @@ export default function Admin() {
 
   return (
     <div>
-      <h1 className="title" style={{ color: '#991b1b', marginBottom: '1.2rem' }}>🛡️ 관리자 페이지</h1>
+      <h1 className="title" style={{ color: '#991b1b', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Shield size={28} color="#991b1b" /> 관리자 페이지
+      </h1>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
         <button 

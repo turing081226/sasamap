@@ -69,7 +69,9 @@ export default function Search() {
 
   return (
     <div>
-      <h1 className="title">🔍 통합 검색</h1>
+      <h1 className="title" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <SearchIcon size={28} color="var(--primary)" /> 통합 검색
+      </h1>
       
       <div className="card" style={{marginBottom: '1rem'}}>
         <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
