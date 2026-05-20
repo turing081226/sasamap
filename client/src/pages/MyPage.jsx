@@ -125,66 +125,34 @@ export default function MyPage() {
   }, [token]);
 
   const fetchFriends = async () => {
-    if (!token) return;
-    try {
-      const res = await fetch(`${API}/friends`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (res.ok) {
-        const data = await res.json();
-        setFriends(data);
-      }
-    } catch (err) { console.error('Failed to fetch friends', err); }
+    // Mock data for UI format demonstration (DB connection disabled)
+    setFriends([
+      { friendship_id: 1, user_id: 101, name: '홍길동', email: 'hong@sasa.hs.kr', location: '📍 3층 수학실', locationType: 'OCCUPANCY' },
+      { friendship_id: 2, user_id: 102, name: '김철수', email: 'kim@sasa.hs.kr', location: '공강', locationType: 'EMPTY' }
+    ]);
   };
 
   const fetchFriendRequests = async () => {
-    if (!token) return;
-    try {
-      const res = await fetch(`${API}/friends/requests`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (res.ok) {
-        const data = await res.json();
-        setFriendRequests(data);
-      }
-    } catch (err) { console.error('Failed to fetch friend requests', err); }
+    // Mock data for UI format demonstration
+    setFriendRequests([
+      { id: 1, sender_id: 201, sender_name: '이영희', sender_email: 'lee@sasa.hs.kr' }
+    ]);
   };
 
   const handleRequestFriend = async () => {
     if (!friendEmail.trim()) { showNotification('error', '이메일을 입력해주세요.'); return; }
-    setFriendLoading(true);
-    try {
-      const res = await fetch(`${API}/friends/request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ email: friendEmail.trim() })
-      });
-      const data = await res.json();
-      if (res.ok) { showNotification('success', data.message); setFriendEmail(''); }
-      else { showNotification('error', data.message); }
-    } catch (err) { showNotification('error', '친구 신청 중 오류 발생'); }
-    finally { setFriendLoading(false); }
+    // Mock functionality
+    showNotification('success', '친구 신청을 보냈습니다. (기능 비활성화됨)');
+    setFriendEmail('');
   };
 
   const handleAcceptFriend = async (id) => {
-    try {
-      const res = await fetch(`${API}/friends/accept/${id}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) { showNotification('success', data.message); fetchFriends(); fetchFriendRequests(); }
-      else { showNotification('error', data.message); }
-    } catch (err) { showNotification('error', '요청 수락 중 오류 발생'); }
+    showNotification('success', '친구 신청을 수락했습니다. (기능 비활성화됨)');
   };
 
   const handleDeleteFriend = async (id) => {
     if (!window.confirm('정말로 삭제/거절하시겠습니까?')) return;
-    try {
-      const res = await fetch(`${API}/friends/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) { showNotification('success', data.message); fetchFriends(); fetchFriendRequests(); }
-      else { showNotification('error', data.message); }
-    } catch (err) { showNotification('error', '삭제 중 오류 발생'); }
+    showNotification('success', '삭제되었습니다. (기능 비활성화됨)');
   };
 
   useEffect(() => {
@@ -611,6 +579,101 @@ export default function MyPage() {
             )}
           </div>
         </div>
+
+        {/* 친구 관리 카드 */}
+        <div className="card" style={{ gridColumn: '1 / -1', borderLeft: '5px solid #10b981' }}>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b' }}>
+            <Users size={18} color="#10b981" /> 👥 내 친구
+          </h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* 친구 추가 구역 */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
+              <div style={{ marginBottom: '0.75rem', fontSize: '0.85rem', color: '#475569' }}>
+                <span style={{ fontWeight: '600' }}>내 아이디 (이메일):</span> <span style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>{user?.email}</span>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="email"
+                  placeholder="친구 이메일 입력"
+                  value={friendEmail}
+                  onChange={e => setFriendEmail(e.target.value)}
+                  style={{
+                    width: '100%', padding: '0.6rem 0.9rem', borderRadius: '8px', border: '1.5px solid #e2e8f0',
+                    fontSize: '0.95rem', outline: 'none', flex: 1
+                  }}
+                />
+                <button
+                  onClick={handleRequestFriend}
+                  disabled={friendLoading}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: 'white', border: 'none', borderRadius: '8px', padding: '0 1rem',
+                    fontWeight: '600', cursor: friendLoading ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '4px'
+                  }}
+                >
+                  <UserPlus size={16} /> 신청
+                </button>
+              </div>
+            </div>
+
+            {/* 받은 친구 요청 목록 */}
+            {friendRequests.length > 0 && (
+              <div>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Bell size={14} /> 받은 친구 요청 ({friendRequests.length})
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {friendRequests.map(req => (
+                    <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#991b1b' }}>{req.sender_name}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#b91c1c' }}>{req.sender_email}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <button onClick={() => handleAcceptFriend(req.id)} style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}>수락</button>
+                        <button onClick={() => handleDeleteFriend(req.id)} style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}>거절</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 승인된 친구 목록 (현재 위치 포함) */}
+            <div>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <CheckCircle size={14} /> 내 친구 목록 ({friends.length})
+              </h3>
+              {friends.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {friends.map(friend => (
+                    <div key={friend.friendship_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.75rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#1e293b' }}>{friend.name}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>({friend.email})</span>
+                        </div>
+                        <div style={{ marginTop: '2px', fontSize: '0.8rem', fontWeight: '600', color: friend.locationType === 'OCCUPANCY' || friend.locationType === 'CLASS' ? '#2563eb' : '#64748b' }}>
+                          {friend.location}
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteFriend(friend.friendship_id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px', fontSize: '0.8rem' }}>
+                  아직 추가된 친구가 없습니다.<br />이메일로 친구를 찾아보세요!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
