@@ -59,7 +59,7 @@ export default function FindRoom() {
     // Fetch all timetables for dynamic map state
     const fetchTimetables = async () => {
       try {
-        const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
         const res = await fetch(`${API}/rooms/timetables`);
         if (res.ok) {
           const data = await res.json();

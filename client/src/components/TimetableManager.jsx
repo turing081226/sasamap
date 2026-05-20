@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Edit3, Trash2, Search, Upload, Download, X, Save, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 const DAYS = ['', '월', '화', '수', '목', '금'];
 
 const MOCK_TIMETABLES = [
