@@ -277,46 +277,6 @@ export default function FindRoom() {
     <div>
       <h1 className="title" style={{ marginBottom: '0.75rem' }}>🏫 교실 찾기</h1>
 
-      {/* Map status legend */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-        gap: '0.4rem',
-        padding: '0.6rem',
-        background: 'var(--card-bg)',
-        borderRadius: '10px',
-        border: '1px solid var(--border-color)',
-        marginBottom: '1rem',
-        fontSize: '0.78rem'
-      }}>
-        {Object.entries(statusColor).map(([key, col]) => {
-          let label = "기타";
-          if (key === 'EMPTY') label = "빈 교실";
-          if (key === 'CLASS') label = "수업 중";
-          if (key === 'IN_USE') label = "사용 중";
-          if (key === 'MAINTENANCE') label = "점검 중";
-          if (key === 'NEEDS_APPROVAL') label = "승인 필요";
-          if (key === 'UNAVAILABLE') label = "사용 불가";
-
-          return (
-            <div key={key} style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '6px', 
-              padding: '4px 6px', 
-              borderRadius: '6px', 
-              background: col.fill, 
-              border: `1px solid ${col.stroke}`,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-            }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: col.stroke, display: 'inline-block' }}></span>
-              <span style={{ fontWeight: '700', color: col.text }}>{label}</span>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Map container */}
       <div
         ref={containerRef}
@@ -440,6 +400,55 @@ export default function FindRoom() {
           })}
         </svg>
 
+        {/* Hint (Top Left) */}
+        <div style={{ position: 'absolute', left: '10px', top: '10px', fontSize: '11px', color: '#64748b', fontWeight: '600', pointerEvents: 'none', background: 'rgba(255,255,255,0.7)', padding: '2px 6px', borderRadius: '4px' }}>
+          드래그로 이동 · 핀치/휠로 줌
+        </div>
+
+        {/* Legend (Bottom Left) */}
+        <div style={{
+          position: 'absolute', left: '10px', bottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px',
+          background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(4px)', padding: '6px', borderRadius: '8px',
+          border: '1px solid var(--border-color)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', fontSize: '10px', zIndex: 10
+        }}>
+          {Object.entries(statusColor).map(([key, col]) => {
+            let label = "기타";
+            if (key === 'EMPTY') label = "빈 교실";
+            if (key === 'CLASS') label = "수업 중";
+            if (key === 'IN_USE') label = "사용 중";
+            if (key === 'MAINTENANCE') label = "점검 중";
+            if (key === 'NEEDS_APPROVAL') label = "승인 필요";
+            if (key === 'UNAVAILABLE') label = "사용 불가";
+            return (
+              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: col.stroke, display: 'inline-block' }}></span>
+                <span style={{ fontWeight: '700', color: col.text }}>{label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Floor Selection (Top Right) */}
+        <div style={{
+          position: 'absolute', right: '10px', top: '10px', display: 'flex', flexDirection: 'column', gap: '4px', zIndex: 10
+        }}>
+          {[5, 4, 3, 2, 1].map(f => (
+            <button
+              key={f}
+              onClick={(e) => { e.stopPropagation(); setFloor(f); setSelectedRoom(null); }}
+              style={{
+                width: '32px', height: '32px', borderRadius: '8px',
+                border: floor === f ? `1px solid var(--primary)` : `1px solid var(--border-color)`,
+                background: floor === f ? 'var(--primary)' : 'white',
+                color: floor === f ? 'white' : '#475569',
+                fontSize: '12px', fontWeight: '700', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >{f}F</button>
+          ))}
+        </div>
+
         {/* Zoom controls */}
         <div style={{ position: 'absolute', right: '10px', bottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {[['＋', 1.2], ['－', 0.8]].map(([label, factor]) => (
@@ -462,29 +471,6 @@ export default function FindRoom() {
           >↺</button>
         </div>
 
-        {/* Hint */}
-        <div style={{ position: 'absolute', left: '10px', bottom: '10px', fontSize: '11px', color: '#94a3b8', pointerEvents: 'none' }}>
-          드래그로 이동 · 핀치/휠로 줌
-        </div>
-      </div>
-
-      {/* Floor Selection */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        {[1, 2, 3, 4, 5].map(f => (
-          <button
-            key={f}
-            className={`btn ${floor === f ? 'btn-primary' : ''}`}
-            onClick={() => { setFloor(f); setSelectedRoom(null); }}
-            style={{ 
-              flex: '1', 
-              background: floor !== f ? 'white' : undefined,
-              color: floor !== f ? '#475569' : undefined,
-              border: floor !== f ? '1px solid #cbd5e1' : undefined
-            }}
-          >
-            {f}층
-          </button>
-        ))}
       </div>
 
       {/* Room detail card */}
