@@ -4,7 +4,7 @@ import TimetableManager from '../components/TimetableManager';
 import RoomManager from '../components/RoomManager';
 import { useAuth } from '../contexts/AuthContext';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
 // ─── Mock fallback (DB 연결 안 됐을 때) ────────────────────────
 const MOCK_USERS = [
