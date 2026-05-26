@@ -125,34 +125,98 @@ export default function MyPage() {
   }, [token]);
 
   const fetchFriends = async () => {
-    // Mock data for UI format demonstration (DB connection disabled)
-    setFriends([
-      { friendship_id: 1, user_id: 101, name: '홍길동', email: 'hong@sasa.hs.kr', location: '📍 3층 수학실', locationType: 'OCCUPANCY' },
-      { friendship_id: 2, user_id: 102, name: '김철수', email: 'kim@sasa.hs.kr', location: '공강', locationType: 'EMPTY' }
-    ]);
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/friends`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setFriends(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch friends', err);
+    }
   };
 
   const fetchFriendRequests = async () => {
-    // Mock data for UI format demonstration
-    setFriendRequests([
-      { id: 1, sender_id: 201, sender_name: '이영희', sender_email: 'lee@sasa.hs.kr' }
-    ]);
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/friends/requests`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setFriendRequests(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch friend requests', err);
+    }
   };
 
   const handleRequestFriend = async () => {
     if (!friendEmail.trim()) { showNotification('error', '이메일을 입력해주세요.'); return; }
-    // Mock functionality
-    showNotification('success', '친구 신청을 보냈습니다. (기능 비활성화됨)');
-    setFriendEmail('');
+    setFriendLoading(true);
+    try {
+      const res = await fetch(`${API}/friends/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ email: friendEmail })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification('success', '친구 신청을 보냈습니다. 💌');
+        setFriendEmail('');
+      } else {
+        showNotification('error', data.message || '친구 신청에 실패했습니다.');
+      }
+    } catch (err) {
+      showNotification('error', '서버 통신 중 오류가 발생했습니다.');
+    } finally {
+      setFriendLoading(false);
+    }
   };
 
   const handleAcceptFriend = async (id) => {
-    showNotification('success', '친구 신청을 수락했습니다. (기능 비활성화됨)');
+    try {
+      const res = await fetch(`${API}/friends/${id}/accept`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        showNotification('success', '친구 요청을 수락했습니다. 🎉');
+        fetchFriendRequests();
+        fetchFriends();
+      } else {
+        const data = await res.json();
+        showNotification('error', data.message || '요청 수락에 실패했습니다.');
+      }
+    } catch (err) {
+      showNotification('error', '서버 통신 중 오류가 발생했습니다.');
+    }
   };
 
   const handleDeleteFriend = async (id) => {
     if (!window.confirm('정말로 삭제/거절하시겠습니까?')) return;
-    showNotification('success', '삭제되었습니다. (기능 비활성화됨)');
+    try {
+      const res = await fetch(`${API}/friends/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        showNotification('success', '요청이 처리되었습니다. 🗑️');
+        fetchFriendRequests();
+        fetchFriends();
+      } else {
+        const data = await res.json();
+        showNotification('error', data.message || '처리에 실패했습니다.');
+      }
+    } catch (err) {
+      showNotification('error', '서버 통신 중 오류가 발생했습니다.');
+    }
   };
 
   useEffect(() => {
