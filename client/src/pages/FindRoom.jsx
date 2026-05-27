@@ -97,7 +97,7 @@ export default function FindRoom() {
     // Fetch all user occupancies for real-time occupancy status
     const fetchOccupancies = async () => {
       try {
-        const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
         const res = await fetch(`${API}/rooms/occupancies`);
         if (res.ok) {
           const data = await res.json();

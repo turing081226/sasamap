@@ -3,7 +3,7 @@ import { Calendar, Plus, Trash2, X, Search, Edit2, Check, RefreshCw } from 'luci
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
 const DAYS = [
   { id: 1, label: '월' },
