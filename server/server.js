@@ -7,27 +7,11 @@ const rateLimit = require('express-rate-limit');
 
 // CORS with credentials for cookies
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? true : 'http://localhost:5173',
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
-
-// Global Rate Limiter
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // 1000 requests per IP
-  message: 'Too many requests from this IP, please try again after 15 minutes'
-});
-app.use('/api/', apiLimiter);
-
-// Auth Rate Limiter
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 50, // 50 logins per IP per hour
-  message: 'Too many login attempts, please try again after an hour'
-});
-app.use('/api/auth/login', authLimiter);
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const roomRoutes = require('./routes/room.routes');

@@ -5,6 +5,33 @@ const getDayLabel = (day) => {
   return days[day] || '';
 };
 
+const formatDetails = (slots, formatFn) => {
+  if (!slots || slots.length === 0) return [];
+  
+  const merged = [];
+  let currentGroup = null;
+
+  for (const s of slots) {
+    const text = formatFn(s);
+    if (!currentGroup) {
+      currentGroup = { day: s.day_of_week, start: s.period, end: s.period, text };
+    } else {
+      if (currentGroup.day === s.day_of_week && currentGroup.text === text && s.period === currentGroup.end + 1) {
+        currentGroup.end = s.period;
+      } else {
+        merged.push(currentGroup);
+        currentGroup = { day: s.day_of_week, start: s.period, end: s.period, text };
+      }
+    }
+  }
+  if (currentGroup) merged.push(currentGroup);
+
+  return merged.map(g => {
+    const periodStr = g.start === g.end ? `${g.start}교시` : `${g.start},${g.end}교시`;
+    return `${getDayLabel(g.day)}요일 ${periodStr}: ${g.text}`;
+  });
+};
+
 exports.searchAll = async (req, res) => {
   try {
     const { q, type } = req.query;
@@ -40,9 +67,7 @@ exports.searchAll = async (req, res) => {
         const uniqueSubjects = Array.from(new Set(slots.map(s => s.subject).filter(Boolean)));
         
         // Format detailed timetable schedule slots
-        const details = slots.map(s => 
-          `${getDayLabel(s.day_of_week)}요일 ${s.period}교시: ${s.subject} (${s.room_name || '장소 미지정'})`
-        );
+        const details = formatDetails(slots, s => `${s.subject} (${s.room_name || '장소 미지정'})`);
 
         results.push({
           id: `teacher_${teacherName}`,
@@ -80,9 +105,7 @@ exports.searchAll = async (req, res) => {
         const uniqueRooms = Array.from(new Set(slots.map(s => s.room_name).filter(Boolean)));
         
         // Format detailed schedule slots for subject
-        const details = slots.map(s => 
-          `${getDayLabel(s.day_of_week)}요일 ${s.period}교시: ${s.teacher_name || '교사 미지정'} 선생님 (${s.room_name || '장소 미지정'})`
-        );
+        const details = formatDetails(slots, s => `${s.teacher_name || '교사 미지정'} 선생님 (${s.room_name || '장소 미지정'})`);
 
         results.push({
           id: `subject_${subjectName}`,
@@ -127,9 +150,7 @@ exports.searchAll = async (req, res) => {
       Object.keys(roomMap).forEach(roomName => {
         const roomData = roomMap[roomName];
         
-        const details = roomData.slots.map(s => 
-          `${getDayLabel(s.day_of_week)}요일 ${s.period}교시: ${s.subject} (${s.teacher_name || '교사 미지정'} 선생님)`
-        );
+        const details = formatDetails(roomData.slots, s => `${s.subject} (${s.teacher_name || '교사 미지정'} 선생님)`);
 
         let statusText = '빈 교실';
         if (roomData.status === 'MAINTENANCE') statusText = '점검 중';

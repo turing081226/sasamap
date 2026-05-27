@@ -120,17 +120,17 @@ export default function Search() {
                 </div>
                 {/* Tooltip Content */}
                 <div className="tooltip-content">
-                  <div style={{ fontWeight: '800', marginBottom: '0.35rem', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '0.2rem', color: '#38bdf8', fontSize: '0.78rem' }}>
+                  <div style={{ fontWeight: '800', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.3rem', color: '#0ea5e9', fontSize: '0.85rem' }}>
                     📅 상세 시간표 일정
                   </div>
                   {item.details && item.details.length > 0 ? (
-                    <ul>
+                    <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.2rem 1rem' }}>
                       {item.details.map((detail, idx) => (
-                        <li key={idx} style={{ fontSize: '0.72rem' }}>{detail}</li>
+                        <li key={idx} style={{ fontSize: '0.75rem', color: '#334155' }}>{detail}</li>
                       ))}
                     </ul>
                   ) : (
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>등록된 정규 시간표 일정이 없습니다.</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>등록된 정규 시간표 일정이 없습니다.</div>
                   )}
                 </div>
               </div>

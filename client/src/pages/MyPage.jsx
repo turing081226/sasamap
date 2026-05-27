@@ -51,7 +51,7 @@ const getDayName = (id) => {
 };
 
 export default function MyPage() {
-  const { user, token, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const showNotification = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
@@ -412,7 +412,7 @@ export default function MyPage() {
                     <p style={{
                       color: '#475569', fontSize: '0.9rem', fontStyle: 'italic',
                       background: '#f8fafc', padding: '0.5rem 0.8rem', borderRadius: '8px',
-                      display: 'inline-block', borderLeft: '3px solid #cbd5e1'
+                      display: 'inline-block'
                     }}>
                       "{user.bio}"
                     </p>
@@ -563,9 +563,10 @@ export default function MyPage() {
                 background: !selectedRoomId
                   ? '#cbd5e1'
                   : isCurrent
-                    ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                    : 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                color: 'white', fontWeight: '700', fontSize: '0.9rem', cursor: !selectedRoomId ? 'not-allowed' : 'pointer',
+                    ? '#fca5a5'
+                    : '#93c5fd',
+                color: !selectedRoomId ? 'white' : (isCurrent ? '#7f1d1d' : '#1e3a8a'),
+                fontWeight: '700', fontSize: '0.9rem', cursor: !selectedRoomId ? 'not-allowed' : 'pointer',
                 boxShadow: selectedRoomId ? '0 2px 5px rgba(0,0,0,0.05)' : 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
                 transition: 'transform 0.1s ease, filter 0.2s ease',
@@ -576,9 +577,9 @@ export default function MyPage() {
               {submitting ? (
                 '등록 중...'
               ) : isCurrent ? (
-                <>📍 나 지금 여기에 있어요 (등록)</>
+                <>📍 등록</>
               ) : (
-                <>📅 나 이때 여기에 있을게요 (예약)</>
+                <>📅 예약</>
               )}
             </button>
           </div>

@@ -44,7 +44,7 @@ const getCurrentPeriod = () => {
 };
 
 export default function FindRoom() {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const [floor, setFloor] = useState(1);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [timetables, setTimetables] = useState([]);

@@ -53,7 +53,7 @@ const getSubjectColor = (subject) => {
 const getDayName = (id) => DAYS.find(d => d.id === id)?.label || '';
 
 export default function Timetable() {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const showNotification = useToast();
   const [userTimetable, setUserTimetable] = useState([]);
   const [masterTimetable, setMasterTimetable] = useState([]);
