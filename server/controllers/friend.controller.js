@@ -149,7 +149,6 @@ exports.getFriends = async (req, res) => {
     // 2. 현재 시간의 user_occupancies 가져오기
     // 2. 오늘의 user_occupancies 가져오기
     let occMap = {};
-    let todayOccupancies = {};
     if (day !== -1 && friendIds.length > 0) {
       const placeholders = friendIds.map(() => '?').join(',');
       const [occRows] = await pool.query(`
@@ -161,11 +160,8 @@ exports.getFriends = async (req, res) => {
       `, [day, ...friendIds]);
       
       occRows.forEach(row => {
-        if (!todayOccupancies[row.user_id]) todayOccupancies[row.user_id] = [];
-        todayOccupancies[row.user_id].push({ period: row.period, text: `${row.period}교시 ${row.room_name}` });
-
         if (period !== -1 && row.period === period) {
-          occMap[row.user_id] = { type: 'OCCUPANCY', text: `📍 ${row.floor}층 ${row.room_name}` };
+          occMap[row.user_id] = { type: 'OCCUPANCY', text: `공강 - ${row.room_name}` };
         }
       });
     }
@@ -182,27 +178,11 @@ exports.getFriends = async (req, res) => {
       `, [day, ...friendIds]);
       
       timeRows.forEach(row => {
-        if (!todayOccupancies[row.user_id]) todayOccupancies[row.user_id] = [];
-        
-        // Add to today's schedule list (avoiding duplicate periods if occupancy already exists)
-        const hasOccupancy = todayOccupancies[row.user_id].some(o => o.period === row.period);
-        if (!hasOccupancy) {
-          todayOccupancies[row.user_id].push({ 
-            period: row.period, 
-            text: `${row.period}교시 ${row.room_name || row.subject}` 
-          });
-        }
-
         if (period !== -1 && row.period === period) {
-          timeMap[row.user_id] = { type: 'CLASS', text: `📖 ${row.room_name || row.subject}` };
+          timeMap[row.user_id] = { type: 'CLASS', text: `${row.subject} - ${row.room_name || '교실 미상'}` };
         }
       });
     }
-
-    // Sort todayOccupancies by period for each user
-    Object.keys(todayOccupancies).forEach(userId => {
-      todayOccupancies[userId].sort((a, b) => a.period - b.period);
-    });
 
     // 4. 결합
     const result = friendsList.map(friend => {
@@ -223,8 +203,7 @@ exports.getFriends = async (req, res) => {
       return {
         ...friend,
         location,
-        locationType,
-        occupanciesToday: todayOccupancies[friend.user_id] || []
+        locationType
       };
     });
 
