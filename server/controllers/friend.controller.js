@@ -2,7 +2,7 @@ const pool = require('../config/db');
 
 // 시간 유틸리티 (현재 교시 계산)
 const getCurrentTimeInfo = () => {
-  const now = new Date();
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
   const currentDay = now.getDay(); // 1 = 월 ... 5 = 금
   if (currentDay < 1 || currentDay > 5) return { day: -1, period: -1 };
 

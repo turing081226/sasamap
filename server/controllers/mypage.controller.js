@@ -75,7 +75,7 @@ exports.setNotification = async (req, res) => {
 
 // Help helper to check if a specific day and period is currently active
 const getOccupyType = (day, period) => {
-  const now = new Date();
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
   const currentDay = now.getDay(); // 1 = Monday ... 5 = Friday
   if (currentDay !== day) return 'FUTURE';
 

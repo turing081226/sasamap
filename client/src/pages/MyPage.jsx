@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle, User } from 'lucide-react';
+import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -648,9 +648,24 @@ export default function MyPage() {
 
         {/* 친구 관리 카드 */}
         <div className="card" style={{ gridColumn: '1 / -1', borderLeft: '5px solid #10b981' }}>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b' }}>
-            <Users size={18} color="#10b981" /> 👥 내 친구
-          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b', margin: 0 }}>
+              <Users size={18} color="#10b981" /> 👥 내 친구
+            </h2>
+            <button
+              onClick={() => { fetchFriends(); fetchFriendRequests(); }}
+              style={{
+                background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px',
+                padding: '0.4rem 0.6rem', fontSize: '0.75rem', fontWeight: '600', color: '#475569',
+                display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
+                transition: 'background 0.2s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+            >
+              <RefreshCw size={14} /> 갱신
+            </button>
+          </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* 친구 추가 구역 */}
