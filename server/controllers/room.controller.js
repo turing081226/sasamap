@@ -3,7 +3,7 @@ const pool = require('../config/db');
 exports.getEmptyRooms = async (req, res) => {
   try {
     const { floor } = req.query;
-    let query = 'SELECT * FROM rooms WHERE status = "EMPTY"';
+    let query = 'SELECT * FROM rooms WHERE status = \'EMPTY\'';
     const params = [];
     
     if (floor) {

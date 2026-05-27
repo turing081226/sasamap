@@ -24,17 +24,20 @@ const wrapQuery = async (client, sql, params = []) => {
   // Handle INSERT RETURNING for insertId
   const isInsert = pgSql.trim().toUpperCase().startsWith('INSERT');
   if (isInsert && !pgSql.toUpperCase().includes('RETURNING')) {
-    pgSql += ' RETURNING id';
+    pgSql += ' RETURNING *';
   }
 
   const result = await client.query(pgSql, params);
 
   if (isInsert) {
-    const insertId = result.rows[0] ? result.rows[0].id : null;
-    return [{ insertId }, result.fields];
+    const insertId = result.rows[0] ? (result.rows[0].id || result.rows[0].user_id) : null;
+    const resObj = { insertId, affectedRows: result.rowCount };
+    return [resObj, result.fields];
   }
 
-  return [result.rows, result.fields];
+  const rows = result.rows;
+  rows.affectedRows = result.rowCount; // For MySQL compatibility
+  return [rows, result.fields];
 };
 
 const pool = {
