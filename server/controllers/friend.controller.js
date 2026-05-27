@@ -147,21 +147,26 @@ exports.getFriends = async (req, res) => {
     const friendIds = friendsList.map(f => f.user_id);
 
     // 2. 현재 시간의 user_occupancies 가져오기
-    let occupancies = [];
-    // 2. 현재 시간의 user_occupancies 가져오기 (MySQL 래퍼 호환성을 위해 아래 동적 IN 쿼리로 통합)
-    // Better compatibility for IN clause across MySQL emulator wrapper
+    // 2. 오늘의 user_occupancies 가져오기
     let occMap = {};
-    if (day !== -1 && period !== -1 && friendIds.length > 0) {
+    let todayOccupancies = {};
+    if (day !== -1 && friendIds.length > 0) {
       const placeholders = friendIds.map(() => '?').join(',');
       const [occRows] = await pool.query(`
-        SELECT uo.user_id, r.name AS room_name, r.floor
+        SELECT uo.user_id, uo.period, r.name AS room_name, r.floor
         FROM user_occupancies uo
         JOIN rooms r ON uo.room_id = r.id
-        WHERE uo.day_of_week = ? AND uo.period = ? AND uo.user_id IN (${placeholders})
-      `, [day, period, ...friendIds]);
+        WHERE uo.day_of_week = ? AND uo.user_id IN (${placeholders})
+        ORDER BY uo.period ASC
+      `, [day, ...friendIds]);
       
       occRows.forEach(row => {
-        occMap[row.user_id] = { type: 'OCCUPANCY', text: `📍 ${row.floor}층 ${row.room_name}` };
+        if (!todayOccupancies[row.user_id]) todayOccupancies[row.user_id] = [];
+        todayOccupancies[row.user_id].push({ period: row.period, text: `${row.period}교시 ${row.room_name}` });
+
+        if (period !== -1 && row.period === period) {
+          occMap[row.user_id] = { type: 'OCCUPANCY', text: `📍 ${row.floor}층 ${row.room_name}` };
+        }
       });
     }
 
@@ -199,7 +204,8 @@ exports.getFriends = async (req, res) => {
       return {
         ...friend,
         location,
-        locationType
+        locationType,
+        occupanciesToday: todayOccupancies[friend.user_id] || []
       };
     });
 

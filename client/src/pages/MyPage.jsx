@@ -724,6 +724,11 @@ export default function MyPage() {
                         <div style={{ marginTop: '2px', fontSize: '0.8rem', fontWeight: '600', color: friend.locationType === 'OCCUPANCY' || friend.locationType === 'CLASS' ? '#2563eb' : '#64748b' }}>
                           {friend.location}
                         </div>
+                        {friend.occupanciesToday && friend.occupanciesToday.length > 0 && (
+                          <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#059669', background: '#d1fae5', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>
+                            오늘 내 위치: {friend.occupanciesToday.map(o => o.text).join(', ')}
+                          </div>
+                        )}
                       </div>
                       <button onClick={() => handleDeleteFriend(friend.friendship_id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
                         <Trash2 size={16} />
