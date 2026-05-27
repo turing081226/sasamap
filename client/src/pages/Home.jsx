@@ -6,7 +6,7 @@ export default function Home() {
     <div>
       <div style={{ textAlign: 'center', marginBottom: '3rem', marginTop: '2rem' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary)', marginBottom: '0.5rem', letterSpacing: '-0.025em' }}>SASA 공강맵</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem' }}>세종과학예술영재학교 교실 찾기 & 빈 교실 조회</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem' }}>세종과학예술영재학교 학생들을 위한 스마트 교내 일정 및 위치 공유 플랫폼</p>
       </div>
 
       <div className="home-grid">

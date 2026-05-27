@@ -348,7 +348,7 @@ export default function MyPage() {
 
       <div className="grid" style={{ gap: '1.5rem' }}>
         {/* Profile Card */}
-        <div className="card" style={{ gridColumn: '1 / -1', borderLeft: '5px solid var(--primary)' }}>
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexWrap: 'wrap' }}>
             {/* Avatar */}
             <div style={{
@@ -647,7 +647,7 @@ export default function MyPage() {
         </div>
 
         {/* 친구 관리 카드 */}
-        <div className="card" style={{ gridColumn: '1 / -1', borderLeft: '5px solid #10b981' }}>
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b', margin: 0 }}>
               <Users size={18} color="#10b981" /> 👥 내 친구

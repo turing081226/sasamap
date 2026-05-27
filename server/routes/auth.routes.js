@@ -4,6 +4,6 @@ const authController = require('../controllers/auth.controller');
 
 router.post('/google', authController.googleLogin);
 router.post('/mock-login', authController.mockLogin);
+router.post('/logout', authController.logout);
 
 module.exports = router;
-

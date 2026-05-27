@@ -37,9 +37,15 @@ exports.googleLogin = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    res.cookie('token', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.json({
       message: 'Login successful',
-      token: jwtToken,
       user: { id: user.id, email: user.email, name: user.name, role: user.role }
     });
 
@@ -76,9 +82,15 @@ exports.mockLogin = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    res.cookie('token', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
     res.json({
       message: 'Mock login successful',
-      token: jwtToken,
       user: { id: user.id, email: user.email, name: user.name, role: user.role }
     });
 
@@ -88,3 +100,11 @@ exports.mockLogin = async (req, res) => {
   }
 };
 
+exports.logout = (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
+  res.json({ message: 'Logout successful' });
+};

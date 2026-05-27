@@ -254,7 +254,7 @@ export default function Timetable() {
   const filteredMasterList = getFilteredMasterCourses();
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '1rem' }}>
+    <div style={{ padding: '1rem' }}>
       
       {/* Styles Injection */}
       <style>{`
@@ -654,7 +654,7 @@ export default function Timetable() {
             <Calendar size={28} color="var(--primary)" /> 내 시간표 설계
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            요일과 교시 빈 칸을 터치해 수업을 구성해 보세요. 과목별로 색상이 자동 지정됩니다.
+            빈 칸을 터치해 수업 정보를 등록해 보세요.
           </p>
         </div>
         

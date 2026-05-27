@@ -9,20 +9,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
+    if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  // 토큰 & 유저 저장
-  const saveAuth = (jwtToken, userData) => {
-    setToken(jwtToken);
+  // 유저 저장 (토큰은 쿠키로 서버에서 알아서 처리됨)
+  const saveAuth = (userData) => {
     setUser(userData);
-    localStorage.setItem('token', jwtToken);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
@@ -36,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await res.json();
       if (res.ok) {
-        saveAuth(data.token, data.user);
+        saveAuth(data.user);
         return { success: true };
       } else {
         return { success: false, message: data.message };
@@ -46,8 +42,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = (jwtToken, userData) => {
-    saveAuth(jwtToken, userData);
+  const login = (userData) => {
+    saveAuth(userData);
   };
 
   // Mock 로그인 — 백엔드 API 호출 → DB에 유저 생성/조회 + 진짜 JWT 발급
@@ -61,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
 
       if (res.ok) {
-        saveAuth(data.token, data.user);
+        saveAuth(data.user);
         return { success: true };
       } else {
         return { success: false, message: data.message };
@@ -75,15 +71,18 @@ export const AuthProvider = ({ children }) => {
       const fallbackUser = {
         id: 0, email, name: email.split('@')[0], role: 'USER',
       };
-      saveAuth(fallbackToken, fallbackUser);
+      saveAuth(fallbackUser);
       return { success: true };
     }
   };
 
-  const logout = () => {
-    setToken(null);
+  const logout = async () => {
+    try {
+      await fetch(`${API}/auth/logout`, { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error', e);
+    }
     setUser(null);
-    localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
 
@@ -96,7 +95,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, googleLogin, mockLogin, logout, updateProfile, loading }}>
+    <AuthContext.Provider value={{ user, login, googleLogin, mockLogin, logout, updateProfile, loading }}>
       {children}
     </AuthContext.Provider>
   );
