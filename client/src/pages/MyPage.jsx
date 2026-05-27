@@ -472,7 +472,7 @@ export default function MyPage() {
         </div>
 
         {/* 내 위치 등록 카드 (Compact Grid Card) */}
-        <div className="card" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="card" style={{ position: 'relative', overflow: 'hidden', gridColumn: '1 / -1' }}>
           {/* Decorative background blur shape */}
           <div style={{
             position: 'absolute', top: '-100px', right: '-100px', width: '200px', height: '200px',
