@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import logoImg from '../assets/logo.png';
 
 export default function Login() {
-  const { mockLogin } = useAuth();
+  const { mockLogin, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
@@ -70,35 +71,29 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Google Login Button (UI only) */}
-        <button
-          type="button"
-          disabled
-          style={{
-            width: '100%',
-            padding: '0.85rem',
-            borderRadius: '10px',
-            border: '1px solid #e2e8f0',
-            background: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.6rem',
-            fontSize: '0.95rem',
-            fontWeight: '600',
-            color: '#475569',
-            cursor: 'not-allowed',
-            opacity: 0.6,
-            marginBottom: '1.25rem',
-          }}
-        >
-          <img
-            src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="Google"
-            style={{ width: '20px', height: '20px' }}
+        {/* Google Login Component */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' }}>
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              setLoading(true);
+              const result = await googleLogin(credentialResponse);
+              if (result.success) {
+                navigate(from, { replace: true });
+              } else {
+                setError(result.message);
+              }
+              setLoading(false);
+            }}
+            onError={() => {
+              setError('구글 로그인에 실패했습니다.');
+            }}
+            useOneTap
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            width="100%"
           />
-          구글 계정으로 로그인 (준비중)
-        </button>
+        </div>
 
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>

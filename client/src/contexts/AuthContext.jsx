@@ -27,6 +27,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 실제 구글 로그인 성공 시 호출
+  const googleLogin = async (credentialResponse) => {
+    try {
+      const res = await fetch(`${API}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        saveAuth(data.token, data.user);
+        return { success: true };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (err) {
+      return { success: false, message: '구글 로그인 서버 오류가 발생했습니다.' };
+    }
+  };
+
   const login = (jwtToken, userData) => {
     saveAuth(jwtToken, userData);
   };
@@ -77,7 +96,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, mockLogin, logout, updateProfile, loading }}>
+    <AuthContext.Provider value={{ user, token, login, googleLogin, mockLogin, logout, updateProfile, loading }}>
       {children}
     </AuthContext.Provider>
   );
