@@ -129,16 +129,17 @@ export default function FindRoom() {
     // Check DB status first to see if it's MAINTENANCE, UNAVAILABLE, or NEEDS_APPROVAL
     const dbRoom = dbRooms.find(r => r.name === room.name);
     const status = dbRoom ? dbRoom.status : room.status;
-    const description = dbRoom ? dbRoom.description : room.current;
+    // Use only room.description (from floorData). If missing, show '-'
+    const description = room.description ? room.description : '-';
 
     if (status === 'MAINTENANCE') {
-      return { ...room, status: 'MAINTENANCE', current: description || '점검 중' };
+      return { ...room, status: 'MAINTENANCE', current: description };
     }
     if (status === 'UNAVAILABLE') {
-      return { ...room, status: 'UNAVAILABLE', current: description || '사용 불가' };
+      return { ...room, status: 'UNAVAILABLE', current: description };
     }
     if (status === 'NEEDS_APPROVAL') {
-      return { ...room, status: 'NEEDS_APPROVAL', current: description || '승인 필요' };
+      return { ...room, status: 'NEEDS_APPROVAL', current: description };
     }
     
     // Check if there is an active class or user occupancy right now
@@ -179,8 +180,8 @@ export default function FindRoom() {
       }
     }
     
-    // Otherwise it's empty
-    return { ...room, status: 'EMPTY', current: '공강' };
+    // Otherwise it's empty — show room description (not '공강')
+    return { ...room, status: 'EMPTY', current: description };
   });
 
   // Reset view when floor changes
@@ -491,7 +492,7 @@ export default function FindRoom() {
             {selectedRoom.status === 'UNAVAILABLE'    && <span className="badge" style={{ background: '#f1f5f9', color: '#334155' }}>사용 불가</span>}
           </div>
           <p style={{ fontSize: '1rem', color: 'var(--text-main)', marginTop: '0.5rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>현재 상태:</span> {selectedRoom.current}
+            <span style={{ color: 'var(--text-muted)' }}>교실명:</span> {selectedRoom.current}
           </p>
         </div>
       )}
