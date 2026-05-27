@@ -582,11 +582,13 @@ export default function Timetable() {
 
         .custom-textbox {
           width: 100%;
+          min-height: 42px;
           padding: 8px 12px;
           border-radius: 8px;
           border: 1.5px solid #cbd5e1;
           outline: none;
-          font-size: 0.88rem;
+          font-size: 0.9rem;
+          line-height: 1.4;
           transition: border-color 0.2s;
         }
 
