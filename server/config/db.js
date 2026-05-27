@@ -13,14 +13,6 @@ const wrapQuery = async (client, sql, params = []) => {
   let i = 1;
   let pgSql = sql.replace(/\?/g, () => `$${i++}`);
 
-  // Convert MySQL 'ON DUPLICATE KEY UPDATE' to PostgreSQL 'ON CONFLICT DO UPDATE'
-  if (pgSql.includes('ON DUPLICATE KEY UPDATE')) {
-    pgSql = pgSql.replace(
-      /ON DUPLICATE KEY UPDATE notification_time = VALUES\(notification_time\)/,
-      'ON CONFLICT (user_id) DO UPDATE SET notification_time = EXCLUDED.notification_time'
-    );
-  }
-
   // Handle INSERT RETURNING for insertId
   const isInsert = pgSql.trim().toUpperCase().startsWith('INSERT');
   if (isInsert && !pgSql.toUpperCase().includes('RETURNING')) {

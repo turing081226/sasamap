@@ -42,7 +42,7 @@ exports.getRoomStatus = async (req, res) => {
 exports.getAllTimetables = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT t.id, t.teacher_name, t.subject, t.day_of_week, t.period,
+      SELECT t.id, t.teacher_id, t.teacher_name, t.subject, t.day_of_week, t.period,
              r.name AS room_name, r.id AS room_id
       FROM timetables t
       LEFT JOIN rooms r ON t.room_id = r.id

@@ -25,7 +25,7 @@ exports.updateUserRole = async (req, res) => {
 exports.getAllTimetables = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT t.id, t.teacher_name, t.subject, t.day_of_week, t.period,
+      SELECT t.id, t.teacher_id, t.teacher_name, t.subject, t.day_of_week, t.period,
              r.name AS room_name, r.id AS room_id
       FROM timetables t
       LEFT JOIN rooms r ON t.room_id = r.id
@@ -39,10 +39,10 @@ exports.getAllTimetables = async (req, res) => {
 
 exports.createTimetable = async (req, res) => {
   try {
-    const { teacher_name, subject, room_id, day_of_week, period } = req.body;
+    const { teacher_id, teacher_name, subject, room_id, day_of_week, period } = req.body;
     const [result] = await pool.query(
-      'INSERT INTO timetables (teacher_name, subject, room_id, day_of_week, period) VALUES (?, ?, ?, ?, ?)',
-      [teacher_name, subject, room_id || null, day_of_week, period]
+      'INSERT INTO timetables (teacher_id, teacher_name, subject, room_id, day_of_week, period) VALUES (?, ?, ?, ?, ?, ?)',
+      [teacher_id || null, teacher_name, subject, room_id || null, day_of_week, period]
     );
     res.json({ message: 'Timetable created', id: result.insertId });
   } catch (err) {
@@ -53,10 +53,10 @@ exports.createTimetable = async (req, res) => {
 exports.updateTimetable = async (req, res) => {
   try {
     const { id } = req.params;
-    const { teacher_name, subject, room_id, day_of_week, period } = req.body;
+    const { teacher_id, teacher_name, subject, room_id, day_of_week, period } = req.body;
     await pool.query(
-      'UPDATE timetables SET teacher_name=?, subject=?, room_id=?, day_of_week=?, period=? WHERE id=?',
-      [teacher_name, subject, room_id || null, day_of_week, period, id]
+      'UPDATE timetables SET teacher_id=?, teacher_name=?, subject=?, room_id=?, day_of_week=?, period=? WHERE id=?',
+      [teacher_id || null, teacher_name, subject, room_id || null, day_of_week, period, id]
     );
     res.json({ message: 'Timetable updated' });
   } catch (err) {
@@ -84,8 +84,8 @@ exports.uploadTimetable = async (req, res) => {
     // Append (기존 데이터 유지, 새 데이터 추가)
     for (const item of timetables) {
       await pool.query(
-        'INSERT INTO timetables (teacher_name, subject, room_id, day_of_week, period) VALUES (?, ?, ?, ?, ?)',
-        [item.teacher_name, item.subject, item.room_id || null, item.day_of_week, item.period]
+        'INSERT INTO timetables (teacher_id, teacher_name, subject, room_id, day_of_week, period) VALUES (?, ?, ?, ?, ?, ?)',
+        [item.teacher_id || null, item.teacher_name, item.subject, item.room_id || null, item.day_of_week, item.period]
       );
     }
     res.json({ message: `${timetables.length}개의 수업 데이터를 추가했습니다.` });

@@ -58,8 +58,13 @@ exports.setNotification = async (req, res) => {
   try {
     const userId = req.user.id;
     const { notification_time } = req.body;
+    
+    // Delete existing notification setting for the user
+    await pool.query('DELETE FROM user_notifications WHERE user_id = ?', [userId]);
+    
+    // Insert new notification setting
     await pool.query(
-      'INSERT INTO user_notifications (user_id, notification_time) VALUES (?, ?) ON DUPLICATE KEY UPDATE notification_time = VALUES(notification_time)',
+      'INSERT INTO user_notifications (user_id, notification_time, is_active) VALUES (?, ?, TRUE)',
       [userId, notification_time]
     );
     res.json({ message: 'Notification settings updated' });
