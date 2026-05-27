@@ -153,14 +153,16 @@ exports.occupyRoom = async (req, res) => {
     // 3. Determine occupy type (CURRENT or FUTURE)
     const occupyType = getOccupyType(dayVal, periodVal);
 
-    // 4. Upsert occupancy: ON CONFLICT(user_id, day_of_week, period)
-    const upsertSql = `
+    // 4. Upsert occupancy (DELETE then INSERT to avoid unique constraint issues)
+    await pool.query(
+      'DELETE FROM user_occupancies WHERE user_id = ? AND day_of_week = ? AND period = ?',
+      [userId, dayVal, periodVal]
+    );
+    const insertSql = `
       INSERT INTO user_occupancies (user_id, room_id, day_of_week, period, occupy_type)
       VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT (user_id, day_of_week, period)
-      DO UPDATE SET room_id = EXCLUDED.room_id, occupy_type = EXCLUDED.occupy_type, created_at = CURRENT_TIMESTAMP
     `;
-    await pool.query(upsertSql, [userId, roomIdVal, dayVal, periodVal, occupyType]);
+    await pool.query(insertSql, [userId, roomIdVal, dayVal, periodVal, occupyType]);
 
     res.json({ message: '위치 정보가 성공적으로 등록/수정되었습니다. 📍' });
   } catch (err) {

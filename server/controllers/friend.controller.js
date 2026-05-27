@@ -148,18 +148,7 @@ exports.getFriends = async (req, res) => {
 
     // 2. 현재 시간의 user_occupancies 가져오기
     let occupancies = [];
-    if (day !== -1 && period !== -1) {
-      const [occRows] = await pool.query(`
-        SELECT uo.user_id, r.name AS room_name, r.floor
-        FROM user_occupancies uo
-        JOIN rooms r ON uo.room_id = r.id
-        WHERE uo.day_of_week = ? AND uo.period = ? AND uo.user_id = ANY($3::int[])
-      `, [day, period, friendIds]); 
-      // Note: PostgreSQL parameter matching might vary, but db.js replaces ? with $1. 
-      // However, db.js regex doesn't handle ANY($3::int[]) well with ? if it breaks syntax. 
-      // Let's use a dynamic IN clause.
-    }
-    
+    // 2. 현재 시간의 user_occupancies 가져오기 (MySQL 래퍼 호환성을 위해 아래 동적 IN 쿼리로 통합)
     // Better compatibility for IN clause across MySQL emulator wrapper
     let occMap = {};
     if (day !== -1 && period !== -1 && friendIds.length > 0) {
