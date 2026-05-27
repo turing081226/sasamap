@@ -52,11 +52,11 @@ async function seedLessonsPG() {
 
     // 2. Insert Timetables
     let timetableCount = 0;
-    
+
     for (const lesson of RAW_LESSONS) {
       const roomId = roomMap[lesson.room];
       const dayOfWeek = dayMap[lesson.day] || 1;
-      
+
       for (let i = 0; i < lesson.time; i++) {
         const currentPeriod = lesson.period + i;
         await pool.query(
