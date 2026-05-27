@@ -513,7 +513,7 @@ export default function Timetable() {
           display: flex;
           flex-direction: column;
           gap: 6px;
-          max-height: 180px;
+          height: 190px;
           overflow-y: auto;
           border: 1px solid #e2e8f0;
           border-radius: 10px;
@@ -860,13 +860,13 @@ export default function Timetable() {
                   </div>
                 ) : (
                   <div style={{
-                    padding: '20px', border: '1px dashed #cbd5e1', borderRadius: '10px', 
-                    background: '#f8fafc', textalign: 'center', color: '#94a3b8', fontSize: '0.78rem',
-                    textAlign: 'center'
+                    height: '190px', border: '1px dashed #cbd5e1', borderRadius: '10px', 
+                    background: '#f8fafc', color: '#94a3b8', fontSize: '0.78rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px'
                   }}>
                     {searchQuery.trim() 
                       ? '검색 결과와 일치하는 개설 수업이 없습니다. 🔍' 
-                      : '이 시간대에 개설된 정규 수업이 없습니다. 아래 수동 입력을 이용하세요.'
+                      : '이 시간대에 개설된 정규 수업이 없습니다.\n아래 수동 입력을 이용하세요.'
                     }
                   </div>
                 )}

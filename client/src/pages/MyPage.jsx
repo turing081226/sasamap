@@ -73,6 +73,10 @@ export default function MyPage() {
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Filters for available rooms
+  const [selectedFilterFloor, setSelectedFilterFloor] = useState('ALL');
+  const [selectedFilterBuilding, setSelectedFilterBuilding] = useState('ALL');
+
   // Friends states
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
@@ -322,6 +326,35 @@ export default function MyPage() {
 
   const isCurrent = isCurrentTime(selectedDay, selectedPeriod);
 
+  const filteredAvailableRooms = availableRooms.filter(room => {
+    let floorMatch = true;
+    if (selectedFilterFloor !== 'ALL') {
+      floorMatch = room.floor === parseInt(selectedFilterFloor, 10);
+    }
+    let buildingMatch = true;
+    if (selectedFilterBuilding !== 'ALL') {
+      const firstChar = room.name ? room.name.charAt(0).toUpperCase() : '';
+      if (selectedFilterBuilding === 'A') {
+        buildingMatch = firstChar === 'A';
+      } else if (selectedFilterBuilding === 'S') {
+        buildingMatch = firstChar === 'S';
+      } else if (selectedFilterBuilding === 'OTHER') {
+        buildingMatch = firstChar !== 'A' && firstChar !== 'S';
+      }
+    }
+    return floorMatch && buildingMatch;
+  });
+
+  useEffect(() => {
+    if (filteredAvailableRooms.length > 0) {
+      if (!filteredAvailableRooms.find(r => r.id === selectedRoomId)) {
+        setSelectedRoomId(filteredAvailableRooms[0].id);
+      }
+    } else {
+      setSelectedRoomId('');
+    }
+  }, [selectedFilterFloor, selectedFilterBuilding, availableRooms]);
+
   const inputStyle = {
     width: '100%',
     padding: '0.6rem 0.9rem',
@@ -528,29 +561,68 @@ export default function MyPage() {
               </div>
             </div>
 
+            {/* 위치 필터링 (층, 동) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div>
+                <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.2rem' }}>층</label>
+                <select
+                  value={selectedFilterFloor}
+                  onChange={e => setSelectedFilterFloor(e.target.value)}
+                  style={{
+                    ...inputStyle, background: 'white', cursor: 'pointer', fontWeight: '600', color: '#1e293b',
+                    border: '1px solid #cbd5e1', padding: '0.4rem 0.6rem', fontSize: '0.875rem'
+                  }}
+                >
+                  <option value="ALL">전체 층</option>
+                  <option value="1">1층</option>
+                  <option value="2">2층</option>
+                  <option value="3">3층</option>
+                  <option value="4">4층</option>
+                  <option value="5">5층</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.2rem' }}>동 (A, S)</label>
+                <select
+                  value={selectedFilterBuilding}
+                  onChange={e => setSelectedFilterBuilding(e.target.value)}
+                  style={{
+                    ...inputStyle, background: 'white', cursor: 'pointer', fontWeight: '600', color: '#1e293b',
+                    border: '1px solid #cbd5e1', padding: '0.4rem 0.6rem', fontSize: '0.875rem'
+                  }}
+                >
+                  <option value="ALL">전체 동</option>
+                  <option value="A">A동</option>
+                  <option value="S">S동</option>
+                  <option value="OTHER">기타</option>
+                </select>
+              </div>
+            </div>
+
             {/* 교실 선택 */}
             <div>
               <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.2rem' }}>머무는 교실</label>
               <select
                 value={selectedRoomId}
                 onChange={e => setSelectedRoomId(e.target.value)}
-                disabled={loadingAvailable || availableRooms.length === 0}
+                disabled={loadingAvailable || filteredAvailableRooms.length === 0}
                 style={{
-                  ...inputStyle, background: 'white', cursor: availableRooms.length > 0 ? 'pointer' : 'not-allowed',
+                  ...inputStyle, background: 'white', cursor: filteredAvailableRooms.length > 0 ? 'pointer' : 'not-allowed',
                   fontWeight: '700', color: '#1e293b', border: '1px solid #cbd5e1',
                   padding: '0.4rem 0.6rem', fontSize: '0.875rem'
                 }}
               >
                 {loadingAvailable ? (
                   <option>조회 중...</option>
-                ) : availableRooms.length > 0 ? (
-                  availableRooms.map(room => (
+                ) : filteredAvailableRooms.length > 0 ? (
+                  filteredAvailableRooms.map(room => (
                     <option key={room.id} value={room.id}>
                       {room.name} ({room.floor}층)
                     </option>
                   ))
                 ) : (
-                  <option>비어있는 교실 없음 ❌</option>
+                  <option>조건에 맞는 교실 없음 ❌</option>
                 )}
               </select>
             </div>
