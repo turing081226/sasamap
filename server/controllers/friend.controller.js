@@ -170,20 +170,39 @@ exports.getFriends = async (req, res) => {
       });
     }
 
-    // 3. 현재 시간의 user_timetables 가져오기
+    // 3. 오늘의 user_timetables 가져오기
     let timeMap = {};
-    if (day !== -1 && period !== -1 && friendIds.length > 0) {
+    if (day !== -1 && friendIds.length > 0) {
       const placeholders = friendIds.map(() => '?').join(',');
       const [timeRows] = await pool.query(`
-        SELECT user_id, room_name, subject
+        SELECT user_id, period, room_name, subject
         FROM user_timetables
-        WHERE day_of_week = ? AND period = ? AND user_id IN (${placeholders})
-      `, [day, period, ...friendIds]);
+        WHERE day_of_week = ? AND user_id IN (${placeholders})
+        ORDER BY period ASC
+      `, [day, ...friendIds]);
       
       timeRows.forEach(row => {
-        timeMap[row.user_id] = { type: 'CLASS', text: `📖 ${row.room_name || row.subject}` };
+        if (!todayOccupancies[row.user_id]) todayOccupancies[row.user_id] = [];
+        
+        // Add to today's schedule list (avoiding duplicate periods if occupancy already exists)
+        const hasOccupancy = todayOccupancies[row.user_id].some(o => o.period === row.period);
+        if (!hasOccupancy) {
+          todayOccupancies[row.user_id].push({ 
+            period: row.period, 
+            text: `${row.period}교시 ${row.room_name || row.subject}` 
+          });
+        }
+
+        if (period !== -1 && row.period === period) {
+          timeMap[row.user_id] = { type: 'CLASS', text: `📖 ${row.room_name || row.subject}` };
+        }
       });
     }
+
+    // Sort todayOccupancies by period for each user
+    Object.keys(todayOccupancies).forEach(userId => {
+      todayOccupancies[userId].sort((a, b) => a.period - b.period);
+    });
 
     // 4. 결합
     const result = friendsList.map(friend => {

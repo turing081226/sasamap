@@ -141,14 +141,7 @@ exports.occupyRoom = async (req, res) => {
       return res.status(400).json({ message: '해당 교실의 해당 시간에는 정규 수업이 있습니다.' });
     }
 
-    // 2. Check if another user has already occupied this room at that time
-    const [otherOccupancies] = await pool.query(
-      'SELECT * FROM user_occupancies WHERE room_id = ? AND day_of_week = ? AND period = ? AND user_id != ?',
-      [roomIdVal, dayVal, periodVal, userId]
-    );
-    if (otherOccupancies.length > 0) {
-      return res.status(400).json({ message: '이미 다른 사용자가 해당 시간에 이 교실을 선점했습니다.' });
-    }
+    // 2. Removed the restriction allowing multiple people to occupy the same room.
 
     // 3. Determine occupy type (CURRENT or FUTURE)
     const occupyType = getOccupyType(dayVal, periodVal);
