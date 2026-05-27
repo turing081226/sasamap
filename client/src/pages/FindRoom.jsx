@@ -129,8 +129,8 @@ export default function FindRoom() {
     // Check DB status first to see if it's MAINTENANCE, UNAVAILABLE, or NEEDS_APPROVAL
     const dbRoom = dbRooms.find(r => r.name === room.name);
     const status = dbRoom ? dbRoom.status : room.status;
-    // Use only room.description (from floorData). If missing, show '-'
-    const description = room.description ? room.description : '-';
+    // Prefer DB description; otherwise use room.description; fallback to '-'
+    const description = (dbRoom && dbRoom.description) ? dbRoom.description : (room.description ? room.description : '-');
 
     if (status === 'MAINTENANCE') {
       return { ...room, status: 'MAINTENANCE', current: description };
