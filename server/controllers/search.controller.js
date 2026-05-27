@@ -67,7 +67,7 @@ exports.searchAll = async (req, res) => {
         const uniqueSubjects = Array.from(new Set(slots.map(s => s.subject).filter(Boolean)));
         
         // Format detailed timetable schedule slots
-        const details = formatDetails(slots, s => `${s.subject} (${s.room_name || '장소 미지정'})`);
+        const details = formatDetails(slots, s => `${s.teacher_name || teacherName} 선생님 (${s.room_name || '장소 미지정'})`);
 
         results.push({
           id: `teacher_${teacherName}`,
@@ -150,7 +150,7 @@ exports.searchAll = async (req, res) => {
       Object.keys(roomMap).forEach(roomName => {
         const roomData = roomMap[roomName];
         
-        const details = formatDetails(roomData.slots, s => `${s.subject} (${s.teacher_name || '교사 미지정'} 선생님)`);
+        const details = formatDetails(roomData.slots, s => `${s.teacher_name || '교사 미지정'} 선생님 (${roomName})`);
 
         let statusText = '빈 교실';
         if (roomData.status === 'MAINTENANCE') statusText = '점검 중';

@@ -6,6 +6,7 @@ export default function Search() {
   const [searchType, setSearchType] = useState('all'); // all -> room -> subject -> teacher
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
 
   // Cycle through search types
   const toggleSearchType = () => {
@@ -106,8 +107,11 @@ export default function Search() {
         ) : (
           <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
             {results.map(item => (
-               <div key={item.id} className="tooltip-container card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', position: 'relative' }}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+               <div key={item.id} className="card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', position: 'relative' }}>
+                <div 
+                  style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer'}}
+                  onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                >
                   <div>
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px'}}>
                       <span className={`badge ${getBadgeColor(item.type)}`} style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}>
@@ -118,21 +122,34 @@ export default function Search() {
                     <p style={{marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{item.subtitle}</p>
                   </div>
                 </div>
-                {/* Tooltip Content */}
-                <div className="tooltip-content">
-                  <div style={{ fontWeight: '800', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.3rem', color: '#0ea5e9', fontSize: '0.85rem' }}>
-                    📅 상세 시간표 일정
+                {/* Expanded Details Content */}
+                {expandedId === item.id && (
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '1rem',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '8px',
+                    position: 'relative',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setExpandedId(null); }} 
+                      style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#64748b' }}
+                    >✕</button>
+                    <div style={{ fontWeight: '800', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.3rem', color: '#0ea5e9', fontSize: '0.85rem', paddingRight: '1.5rem' }}>
+                      📅 상세 시간표 일정
+                    </div>
+                    {item.details && item.details.length > 0 ? (
+                      <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.2rem 1rem', listStyle: 'none', padding: 0, margin: 0 }}>
+                        {item.details.map((detail, idx) => (
+                          <li key={idx} style={{ fontSize: '0.65rem', color: '#334155', padding: '0.35rem 0', borderBottom: '1px solid #f1f5f9', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.3 }}>{detail}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>등록된 정규 시간표 일정이 없습니다.</div>
+                    )}
                   </div>
-                  {item.details && item.details.length > 0 ? (
-                    <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.2rem 1rem' }}>
-                      {item.details.map((detail, idx) => (
-                        <li key={idx} style={{ fontSize: '0.75rem', color: '#334155' }}>{detail}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>등록된 정규 시간표 일정이 없습니다.</div>
-                  )}
-                </div>
+                )}
               </div>
             ))}
           </div>

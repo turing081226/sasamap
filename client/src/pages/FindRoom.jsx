@@ -212,7 +212,20 @@ export default function FindRoom() {
     const handleWheel = (e) => {
       e.preventDefault();
       const delta = e.deltaY > 0 ? 0.9 : 1.1;
-      setScale(prev => Math.min(3, Math.max(0.5, prev * delta)));
+      
+      const rect = container.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      setScale(prev => {
+        const newScale = Math.min(3, Math.max(0.5, prev * delta));
+        const ratio = newScale / prev;
+        setOffset(prevOff => ({
+          x: cx - (cx - prevOff.x) * ratio,
+          y: cy - (cy - prevOff.y) * ratio
+        }));
+        return newScale;
+      });
     };
 
     const handleTouchStart = (e) => {
@@ -241,7 +254,19 @@ export default function FindRoom() {
         const dist = Math.hypot(dx, dy);
         if (lastTouchDist.current) {
           const ratio = dist / lastTouchDist.current;
-          setScale(prev => Math.min(3, Math.max(0.5, prev * ratio)));
+          const rect = container.getBoundingClientRect();
+          const cx = rect.width / 2;
+          const cy = rect.height / 2;
+
+          setScale(prev => {
+            const newScale = Math.min(3, Math.max(0.5, prev * ratio));
+            const actualRatio = newScale / prev;
+            setOffset(prevOff => ({
+              x: cx - (cx - prevOff.x) * actualRatio,
+              y: cy - (cy - prevOff.y) * actualRatio
+            }));
+            return newScale;
+          });
         }
         lastTouchDist.current = dist;
       }
@@ -454,7 +479,22 @@ export default function FindRoom() {
           {[['＋', 1.2], ['－', 0.8]].map(([label, factor]) => (
             <button
               key={label}
-              onClick={() => setScale(prev => Math.min(3, Math.max(0.5, prev * factor)))}
+              onClick={() => {
+                const container = containerRef.current;
+                if (!container) return;
+                const rect = container.getBoundingClientRect();
+                const cx = rect.width / 2;
+                const cy = rect.height / 2;
+                setScale(prev => {
+                  const newScale = Math.min(3, Math.max(0.5, prev * factor));
+                  const ratio = newScale / prev;
+                  setOffset(prevOff => ({
+                    x: cx - (cx - prevOff.x) * ratio,
+                    y: cy - (cy - prevOff.y) * ratio
+                  }));
+                  return newScale;
+                });
+              }}
               style={{
                 width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border-color)',
                 background: 'white', fontSize: '18px', cursor: 'pointer', display: 'flex',
@@ -475,9 +515,15 @@ export default function FindRoom() {
 
       {/* Room detail card */}
       {selectedRoom && (
-        <div className="card" style={{ borderLeft: '4px solid var(--primary)' }}>
+        <div className="card" style={{ borderLeft: '4px solid var(--primary)', position: 'relative' }}>
+          <button 
+            onClick={() => setSelectedRoom(null)} 
+            style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--text-muted)' }}
+          >
+            ✕
+          </button>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>교실 상세 정보</h2>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', paddingRight: '2rem' }}>
             <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '1.1rem' }}>
               <MapPin size={16} /> {selectedRoom.name}
             </span>
