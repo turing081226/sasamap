@@ -52,6 +52,7 @@ const getDayName = (id) => {
 
 export default function MyPage() {
   const { user, logout, updateProfile } = useAuth();
+  const token = 'cookie-auth';
   const showNotification = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({

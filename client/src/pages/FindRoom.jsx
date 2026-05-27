@@ -62,12 +62,9 @@ export default function FindRoom() {
   // Fetch dbRooms
   useEffect(() => {
     const fetchRooms = async () => {
-      if (!token) return;
       try {
         const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
-        const res = await fetch(`${API}/rooms`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetch(`${API}/rooms`);
         if (res.ok) {
           const data = await res.json();
           setDbRooms(data);
@@ -77,7 +74,7 @@ export default function FindRoom() {
       }
     };
     fetchRooms();
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     // Fetch all timetables for dynamic map state

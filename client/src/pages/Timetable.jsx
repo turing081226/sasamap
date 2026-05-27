@@ -54,6 +54,7 @@ const getDayName = (id) => DAYS.find(d => d.id === id)?.label || '';
 
 export default function Timetable() {
   const { user } = useAuth();
+  const token = 'cookie-auth';
   const showNotification = useToast();
   const [userTimetable, setUserTimetable] = useState([]);
   const [masterTimetable, setMasterTimetable] = useState([]);
