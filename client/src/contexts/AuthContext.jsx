@@ -46,36 +46,6 @@ export const AuthProvider = ({ children }) => {
     saveAuth(userData);
   };
 
-  // Mock 로그인 — 백엔드 API 호출 → DB에 유저 생성/조회 + 진짜 JWT 발급
-  const mockLogin = async (email) => {
-    try {
-      const res = await fetch(`${API}/auth/mock-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        saveAuth(data.user);
-        return { success: true };
-      } else {
-        return { success: false, message: data.message };
-      }
-    } catch (err) {
-      // 백엔드 연결 실패 시 프론트 전용 폴백
-      if (!email.endsWith('@sasa.hs.kr')) {
-        return { success: false, message: '학교 계정(@sasa.hs.kr)만 로그인할 수 있습니다.' };
-      }
-      const fallbackToken = 'fallback-token-' + Date.now();
-      const fallbackUser = {
-        id: 0, email, name: email.split('@')[0], role: 'USER',
-      };
-      saveAuth(fallbackUser);
-      return { success: true };
-    }
-  };
-
   const logout = async () => {
     try {
       await fetch(`${API}/auth/logout`, { method: 'POST' });
@@ -95,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, googleLogin, mockLogin, logout, updateProfile, loading }}>
+    <AuthContext.Provider value={{ user, login, googleLogin, logout, updateProfile, loading }}>
       {children}
     </AuthContext.Provider>
   );
