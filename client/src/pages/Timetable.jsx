@@ -896,20 +896,10 @@ export default function Timetable() {
                     />
                   </div>
 
-                  {/* Teacher Name */}
-                  <div>
-                    <label className="custom-input-label">교사명 (선택)</label>
-                    <input 
-                      type="text" 
-                      className="custom-textbox" 
-                      placeholder="예: 김정화"
-                      value={customTeacher}
-                      onChange={e => setCustomTeacher(e.target.value)}
-                    />
-                  </div>
+
 
                   {/* Room Name */}
-                  <div>
+                  <div className="form-full-width">
                     <label className="custom-input-label">교실 (선택)</label>
                     <input 
                       type="text" 

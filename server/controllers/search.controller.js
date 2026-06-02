@@ -56,10 +56,11 @@ exports.searchAll = async (req, res) => {
       const teacherMap = {};
       rows.forEach(row => {
         if (!row.teacher_name) return;
-        if (!teacherMap[row.teacher_name]) {
-          teacherMap[row.teacher_name] = [];
+        const cleanName = row.teacher_name.replace(/\s+/g, '');
+        if (!teacherMap[cleanName]) {
+          teacherMap[cleanName] = [];
         }
-        teacherMap[row.teacher_name].push(row);
+        teacherMap[cleanName].push(row);
       });
 
       Object.keys(teacherMap).forEach(teacherName => {
