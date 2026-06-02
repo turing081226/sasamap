@@ -59,6 +59,17 @@ export default function FindRoom() {
   const lastPos = useRef({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
+  const clampOffset = (newX, newY, currentScale) => {
+    if (!containerRef.current) return { x: newX, y: newY };
+    const rect = containerRef.current.getBoundingClientRect();
+    const minX = rect.width * (1 - currentScale);
+    const minY = rect.height * (1 - currentScale);
+    return {
+      x: Math.min(Math.max(newX, minX), 0),
+      y: Math.min(Math.max(newY, minY), 0)
+    };
+  };
+
   // Fetch dbRooms
   useEffect(() => {
     const fetchRooms = async () => {
@@ -199,7 +210,7 @@ export default function FindRoom() {
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+    setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scale));
   };
   const onMouseUp = () => { isPanning.current = false; };
 
@@ -221,10 +232,11 @@ export default function FindRoom() {
       setScale(prev => {
         const newScale = Math.min(3, Math.max(1.0, prev * delta));
         const ratio = newScale / prev;
-        setOffset(prevOff => ({
-          x: cx - (cx - prevOff.x) * ratio,
-          y: cy - (cy - prevOff.y) * ratio
-        }));
+        setOffset(prevOff => clampOffset(
+          cx - (cx - prevOff.x) * ratio,
+          cy - (cy - prevOff.y) * ratio,
+          newScale
+        ));
         return newScale;
       });
     };
@@ -247,7 +259,7 @@ export default function FindRoom() {
         const dx = e.touches[0].clientX - lastPos.current.x;
         const dy = e.touches[0].clientY - lastPos.current.y;
         lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+        setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scale));
       }
       if (e.touches.length === 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -262,10 +274,11 @@ export default function FindRoom() {
           setScale(prev => {
             const newScale = Math.min(3, Math.max(1.0, prev * ratio));
             const actualRatio = newScale / prev;
-            setOffset(prevOff => ({
-              x: cx - (cx - prevOff.x) * actualRatio,
-              y: cy - (cy - prevOff.y) * actualRatio
-            }));
+            setOffset(prevOff => clampOffset(
+              cx - (cx - prevOff.x) * actualRatio,
+              cy - (cy - prevOff.y) * actualRatio,
+              newScale
+            ));
             return newScale;
           });
         }
@@ -489,10 +502,11 @@ export default function FindRoom() {
                 setScale(prev => {
                   const newScale = Math.min(3, Math.max(1.0, prev * factor));
                   const ratio = newScale / prev;
-                  setOffset(prevOff => ({
-                    x: cx - (cx - prevOff.x) * ratio,
-                    y: cy - (cy - prevOff.y) * ratio
-                  }));
+                  setOffset(prevOff => clampOffset(
+                    cx - (cx - prevOff.x) * ratio,
+                    cy - (cy - prevOff.y) * ratio,
+                    newScale
+                  ));
                   return newScale;
                 });
               }}
