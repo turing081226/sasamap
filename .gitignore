@@ -11,3 +11,7 @@ npm-debug.log*
 # OS 파일
 .DS_Store
 Thumbs.db
+
+# AI용 설명서 (깃허브 업로드 방지)
+.ai_architecture.md
+.ai_readme.md
