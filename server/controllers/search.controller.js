@@ -27,7 +27,7 @@ const formatDetails = (slots, formatFn) => {
   if (currentGroup) merged.push(currentGroup);
 
   return merged.map(g => {
-    const periodStr = g.start === g.end ? `${g.start}교시` : `${g.start},${g.end}교시`;
+    const periodStr = g.start === g.end ? `${g.start}교시` : `${g.start}~${g.end}교시`;
     return `${getDayLabel(g.day)}요일 ${periodStr}: ${g.text}`;
   });
 };
