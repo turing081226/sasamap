@@ -71,6 +71,7 @@ export default function Login() {
               setError('구글 로그인에 실패했습니다.');
             }}
             useOneTap
+            auto_select
             shape="rectangular"
             theme="outline"
             size="large"
