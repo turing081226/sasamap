@@ -219,7 +219,7 @@ export default function FindRoom() {
       const cy = rect.height / 2;
 
       setScale(prev => {
-        const newScale = Math.min(3, Math.max(0.5, prev * delta));
+        const newScale = Math.min(3, Math.max(1.0, prev * delta));
         const ratio = newScale / prev;
         setOffset(prevOff => ({
           x: cx - (cx - prevOff.x) * ratio,
@@ -260,7 +260,7 @@ export default function FindRoom() {
           const cy = rect.height / 2;
 
           setScale(prev => {
-            const newScale = Math.min(3, Math.max(0.5, prev * ratio));
+            const newScale = Math.min(3, Math.max(1.0, prev * ratio));
             const actualRatio = newScale / prev;
             setOffset(prevOff => ({
               x: cx - (cx - prevOff.x) * actualRatio,
@@ -487,7 +487,7 @@ export default function FindRoom() {
                 const cx = rect.width / 2;
                 const cy = rect.height / 2;
                 setScale(prev => {
-                  const newScale = Math.min(3, Math.max(0.5, prev * factor));
+                  const newScale = Math.min(3, Math.max(1.0, prev * factor));
                   const ratio = newScale / prev;
                   setOffset(prevOff => ({
                     x: cx - (cx - prevOff.x) * ratio,
