@@ -310,39 +310,6 @@ export default function FindRoom() {
     setSelectedRoom(prev => prev?.id === room.id ? null : room);
   };
 
-  const renderIcons = () => {
-    if (floor < 1 || floor > 5) return null;
-
-    const icons = [
-      { type: 'restroom', cx: 1073, cy: 1144 },
-      { type: 'elevator', cx: 1125, cy: 1165 },
-      { type: 'restroom', cx: 670, cy: 1195 },
-      { type: 'restroom', cx: 1400, cy: 980 }
-    ];
-
-    return icons.map((icon, i) => (
-      <g key={`icon-${i}`} transform={`translate(${icon.cx}, ${icon.cy}) scale(0.9)`}>
-        <rect x="-16" y="-16" width="32" height="32" fill="#ffffff" rx="4" />
-        {icon.type === 'restroom' ? (
-          <g fill="#475569">
-            <circle cx="-6" cy="-8" r="2.5" />
-            <path d="M-9,-4 h6 v8 h-2 v6 h-2 v-6 h-2 z" />
-            <circle cx="6" cy="-8" r="2.5" />
-            <path d="M3,-4 h6 l2,8 h-2 v6 h-2 v-6 h-2 l-2,-8 z" />
-          </g>
-        ) : (
-          <g fill="#475569">
-            <rect x="-12" y="-14" width="24" height="28" rx="2" fill="none" stroke="#475569" strokeWidth="1.5"/>
-            <circle cx="0" cy="-5" r="2.5" />
-            <path d="M-3,-1 h6 v7 h-1 v5 h-4 v-5 h-1 z" />
-            <polygon points="-8,-2 -6,-6 -4,-2" />
-            <polygon points="4,-6 6,-2 8,-6" />
-          </g>
-        )}
-      </g>
-    ));
-  };
-
   return (
     <div>
       <h1 className="title" style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -470,7 +437,6 @@ export default function FindRoom() {
               </g>
             );
           })}
-          {renderIcons()}
         </svg>
 
         {/* Hint (Top Left) */}
