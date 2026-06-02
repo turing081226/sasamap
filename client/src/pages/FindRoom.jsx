@@ -314,7 +314,7 @@ export default function FindRoom() {
           width: '100%',
           height: '400px',
           overflow: 'hidden',
-          background: '#f1f5f9',
+          background: '#ffffff',
           borderRadius: '12px',
           border: '1px solid var(--border-color)',
           cursor: isPanning.current ? 'grabbing' : 'grab',
