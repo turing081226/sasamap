@@ -135,9 +135,6 @@ export default function FindRoom() {
     if (status === 'UNAVAILABLE') {
       return { ...room, status: 'UNAVAILABLE', current: description };
     }
-    if (status === 'NEEDS_APPROVAL') {
-      return { ...room, status: 'NEEDS_APPROVAL', current: description };
-    }
     
     // Check if there is an active class or user occupancy right now
     if (currentDay >= 1 && currentDay <= 5 && currentPeriod) {
@@ -175,6 +172,10 @@ export default function FindRoom() {
           current: currentText
         };
       }
+    }
+    
+    if (status === 'NEEDS_APPROVAL') {
+      return { ...room, status: 'NEEDS_APPROVAL', current: description };
     }
     
     // Otherwise it's empty — show room description (not '공강')
