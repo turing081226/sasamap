@@ -405,31 +405,6 @@ export default function MyPage() {
                     <input style={inputStyle} value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-                    <div>
-                      <label style={labelStyle}>학년</label>
-                      <input style={inputStyle} value={form.grade} placeholder="1"
-                        onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>반</label>
-                      <input style={inputStyle} value={form.classNum} placeholder="3"
-                        onChange={e => setForm(f => ({ ...f, classNum: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>번호</label>
-                      <input style={inputStyle} value={form.studentId} placeholder="12"
-                        onChange={e => setForm(f => ({ ...f, studentId: e.target.value }))} />
-                    </div>
-                  </div>
-                  <div>
-                    <label style={labelStyle}>한 마디</label>
-                    <textarea
-                      style={{ ...inputStyle, resize: 'vertical', minHeight: '60px' }}
-                      value={form.bio}
-                      onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                    />
-                  </div>
                 </div>
               ) : (
                 <>
@@ -439,18 +414,6 @@ export default function MyPage() {
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
                     {user?.email}
                   </p>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                    {user?.grade ? `${user.grade}학년 ${user.classNum}반 ${user.studentId}번` : '정보 등록 필요'}
-                  </p>
-                  {user?.bio && (
-                    <p style={{
-                      color: '#475569', fontSize: '0.9rem', fontStyle: 'italic',
-                      background: '#f8fafc', padding: '0.5rem 0.8rem', borderRadius: '8px',
-                      display: 'inline-block'
-                    }}>
-                      "{user.bio}"
-                    </p>
-                  )}
                 </>
               )}
             </div>
