@@ -350,19 +350,19 @@ export default function FindRoom() {
           }}
         >
           {floor === 1 && (
-            <image href="/1F_bg.jpg" width="2564" height="2788" transform="translate(329.92 47.83) scale(.48)" />
+            <image style={{ pointerEvents: 'none' }} draggable={false} href="/1F_bg.jpg" width="2564" height="2788" transform="translate(329.92 47.83) scale(.48)" />
           )}
           {floor === 2 && (
-            <image href="/2F_bg.jpg" width="2612" height="2760" transform="translate(318.5 51.6) scale(.5)" />
+            <image style={{ pointerEvents: 'none' }} draggable={false} href="/2F_bg.jpg" width="2612" height="2760" transform="translate(318.5 51.6) scale(.5)" />
           )}
           {floor === 3 && (
-            <image href="/3F_bg.jpg" width="2564" height="2736" transform="translate(359.4 88.26) scale(.48)" />
+            <image style={{ pointerEvents: 'none' }} draggable={false} href="/3F_bg.jpg" width="2564" height="2736" transform="translate(359.4 88.26) scale(.48)" />
           )}
           {floor === 4 && (
-            <image href="/4F_bg.jpg" width="2592" height="2760" transform="translate(366.15 84.68) scale(.48)" />
+            <image style={{ pointerEvents: 'none' }} draggable={false} href="/4F_bg.jpg" width="2592" height="2760" transform="translate(366.15 84.68) scale(.48)" />
           )}
           {floor === 5 && (
-            <image href="/5F_bg.jpg" width="2540" height="2752" transform="translate(361.13 86.7) scale(.48)" />
+            <image style={{ pointerEvents: 'none' }} draggable={false} href="/5F_bg.jpg" width="2540" height="2752" transform="translate(361.13 86.7) scale(.48)" />
           )}
 
           {floor !== 1 && floor !== 2 && floor !== 3 && floor !== 4 && floor !== 5 && (
