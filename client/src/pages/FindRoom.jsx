@@ -53,7 +53,10 @@ export default function FindRoom() {
   const [dbRooms, setDbRooms] = useState([]);
 
   // Pan & Zoom state
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(() => {
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? 0.65 : 1;
+  });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -438,6 +441,11 @@ export default function FindRoom() {
             );
           })}
         </svg>
+
+        {/* Hint (Top Left) */}
+        <div style={{ position: 'absolute', left: '10px', top: '10px', fontSize: '11px', color: '#64748b', fontWeight: '600', pointerEvents: 'none', background: 'rgba(255,255,255,0.7)', padding: '2px 6px', borderRadius: '4px' }}>
+          드래그로 이동 · 핀치/휠로 줌
+        </div>
 
         {/* Legend (Bottom Left) */}
         <div style={{
