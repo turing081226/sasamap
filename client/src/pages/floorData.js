@@ -1,6 +1,6 @@
 export const floorData = {
       1: {
-            viewBox: "730 650 870 800",
+            viewBox: "500 650 1000 800",
             rooms: [
                   { id: 'A109', name: 'A109', type: 'polygon', points: '945.86 717.57 885.71 809.14 982.86 873.14 1041.14 782.86 945.86 717.57', cx: 963, cy: 795, status: 'EMPTY', current: '공강' },
                   { id: 'A108', name: 'A108', type: 'polygon', points: '1014.48 824.16 982.86 873.14 1067.43 929.14 1100.25 880.21 1014.48 824.16', cx: 1040, cy: 876, status: 'EMPTY', current: '공강' },
@@ -28,7 +28,7 @@ export const floorData = {
             ]
       },
       2: {
-            viewBox: "730 650 870 800",
+            viewBox: "500 650 1000 800",
             rooms: [
                   { id: 'S201', name: 'S201', type: 'rect', x: 1158, y: 1206.6, w: 82.03, h: 75.9, cx: 1199.015, cy: 1244.55, status: 'EMPTY', current: '공강' },
                   { id: 'S204', name: 'S204', type: 'rect', x: 1007.46, y: 1206.6, w: 43.04, h: 75.9, cx: 1028.98, cy: 1244.55, status: 'EMPTY', current: '공강' },
@@ -58,7 +58,7 @@ export const floorData = {
             ]
       },
       3: {
-            viewBox: "730 650 870 800",
+            viewBox: "500 650 1000 800",
             bgImage: "/3F_bg.jpg",
             rooms: [
                   {
@@ -337,7 +337,7 @@ export const floorData = {
             ]
       },
       4: {
-            viewBox: "730 650 870 800",
+            viewBox: "500 650 1000 800",
             bgImage: "/4F_bg.jpg",
             rooms: [
                   {
@@ -626,7 +626,7 @@ export const floorData = {
             ]
       },
       5: {
-            viewBox: "730 650 870 800",
+            viewBox: "500 650 1000 800",
             bgImage: "/5F_bg.jpg",
             rooms: [
                   {
