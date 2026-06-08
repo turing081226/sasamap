@@ -395,7 +395,7 @@ export default function MyPage() {
           }} />
 
           <h2 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b' }}>
-            <MapPin size={18} color="var(--primary)" /> 위치 공유하기
+            <MapPin size={18} color="#10b981" /> 위치 공유하기
           </h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.85rem', lineHeight: '1.4' }}>
             공강 시간에 머무는 위치를 친구들과 실시간으로 공유해보세요.
@@ -599,7 +599,7 @@ export default function MyPage() {
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b', margin: 0 }}>
-              <Users size={18} color="#10b981" /> 친구 관리
+              <Users size={18} color="var(--primary)" /> 친구 관리
             </h2>
           </div>
           
