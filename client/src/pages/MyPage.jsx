@@ -526,9 +526,9 @@ export default function MyPage() {
               {submitting ? (
                 '공유 중...'
               ) : isCurrent ? (
-                <>공유</>
+                <>완료</>
               ) : (
-                <>📅 예약</>
+                <>완료</>
               )}
             </button>
           </div>
