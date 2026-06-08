@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Bell, Edit3, LogOut, Save, X, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle, User, RefreshCw } from 'lucide-react';
+import { Calendar, Bell, LogOut, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -54,16 +54,6 @@ export default function MyPage() {
   const { user, logout, updateProfile } = useAuth();
   const token = 'cookie-auth';
   const showNotification = useToast();
-  const [isEditing, setIsEditing] = useState(false);
-  const [form, setForm] = useState({
-    name: user?.name || '',
-    grade: user?.grade || '',
-    classNum: user?.classNum || '',
-    studentId: user?.studentId || '',
-    bio: user?.bio || '',
-  });
-  const [saveMsg, setSaveMsg] = useState('');
-
   // Location occupancy states
   const [occupancies, setOccupancies] = useState([]);
   const [selectedDay, setSelectedDay] = useState(getDefaultDay());
@@ -228,30 +218,6 @@ export default function MyPage() {
     fetchAvailableRooms(selectedDay, selectedPeriod);
   }, [selectedDay, selectedPeriod, token]);
 
-  const handleEdit = () => {
-    setForm({
-      name: user?.name || '',
-      grade: user?.grade || '',
-      classNum: user?.classNum || '',
-      studentId: user?.studentId || '',
-      bio: user?.bio || '',
-    });
-    setIsEditing(true);
-    setSaveMsg('');
-  };
-
-  const handleSave = () => {
-    updateProfile(form);
-    setIsEditing(false);
-    setSaveMsg('저장되었습니다! ✅');
-    setTimeout(() => setSaveMsg(''), 3000);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setSaveMsg('');
-  };
-
   // Occupy a room
   const handleRegisterOccupancy = async () => {
     if (!selectedRoomId) {
@@ -393,7 +359,7 @@ export default function MyPage() {
               color: 'white', fontSize: '1.8rem', fontWeight: 'bold',
               boxShadow: '0 4px 10px rgba(37,99,235,0.2)',
             }}>
-              {user?.name?.charAt(0) || '?'}
+              <User size={32} />
             </div>
 
             {/* Info */}
@@ -420,52 +386,17 @@ export default function MyPage() {
 
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-start', flexWrap: 'wrap' }}>
-              {isEditing ? (
-                <>
-                  <button onClick={handleSave} className="btn"
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem' }}>
-                    <Save size={16} /> 저장
-                  </button>
-                  <button onClick={handleCancel}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.4rem',
-                      padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0',
-                      background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b'
-                    }}>
-                    <X size={16} /> 취소
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={handleEdit}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.4rem',
-                      padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0',
-                      background: 'white', cursor: 'pointer', fontWeight: '600', color: '#475569'
-                    }}>
-                    <Edit3 size={16} /> 프로필 수정
-                  </button>
-                  <button onClick={logout}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.4rem',
-                      padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #fecaca',
-                      background: '#fff7f7', cursor: 'pointer', fontWeight: '600', color: '#ef4444'
-                    }}>
-                    <LogOut size={16} /> 로그아웃
-                  </button>
-                </>
-              )}
+              <button onClick={logout}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.4rem',
+                  padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #fecaca',
+                  background: '#fff7f7', cursor: 'pointer', fontWeight: '600', color: '#ef4444'
+                }}>
+                <LogOut size={16} /> 로그아웃
+              </button>
             </div>
           </div>
 
-          {saveMsg && (
-            <div style={{
-              marginTop: '0.75rem', padding: '0.6rem 1rem', borderRadius: '8px',
-              background: '#dcfce7', color: '#166534', fontSize: '0.9rem', fontWeight: '600'
-            }}>
-              {saveMsg}
-            </div>
-          )}
         </div>
 
         {/* 내 위치 등록 카드 (Compact Grid Card) */}
@@ -481,7 +412,7 @@ export default function MyPage() {
             <MapPin size={18} color="var(--primary)" /> 위치 공유하기
           </h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.85rem', lineHeight: '1.4' }}>
-            공강 시간에 머무는 교실을 등록하여 친구들과 실시간 위치를 공유해보세요.
+            공강 시간에 머무는 위치를 친구들과 실시간으로 공유해보세요.
           </p>
 
           {/* 등록 폼 */}
@@ -601,7 +532,7 @@ export default function MyPage() {
                   : isCurrent
                     ? '#fca5a5'
                     : '#93c5fd',
-                color: !selectedRoomId ? 'white' : (isCurrent ? '#7f1d1d' : '#1e3a8a'),
+                color: !selectedRoomId ? 'white' : (isCurrent ? '#1d7a7f' : '#1e3a8a'),
                 fontWeight: '700', fontSize: '0.9rem', cursor: !selectedRoomId ? 'not-allowed' : 'pointer',
                 boxShadow: selectedRoomId ? '0 2px 5px rgba(0,0,0,0.05)' : 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
@@ -611,9 +542,9 @@ export default function MyPage() {
               onMouseUp={e => { if (selectedRoomId) e.currentTarget.style.transform = 'scale(1)'; }}
             >
               {submitting ? (
-                '등록 중...'
+                '공유 중...'
               ) : isCurrent ? (
-                <>등록</>
+                <>공유</>
               ) : (
                 <>📅 예약</>
               )}
@@ -623,7 +554,7 @@ export default function MyPage() {
           {/* 내 위치 등록 내역 */}
           <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '0.75rem' }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Clock size={14} /> 내 위치 등록 내역 ({occupancies.length})
+              <Clock size={14} /> 위치 공유 히스토리 ({occupancies.length})
             </h3>
             {occupancies.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px' }}>
@@ -677,7 +608,6 @@ export default function MyPage() {
                 border: '1px dashed #cbd5e1', borderRadius: '8px', fontSize: '0.8rem', lineHeight: '1.4'
               }}>
                 등록된 위치 정보가 없습니다.<br />
-                위 폼에서 내 위치를 등록해 보세요! 🚀
               </div>
             )}
           </div>
@@ -689,19 +619,6 @@ export default function MyPage() {
             <h2 style={{ fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b', margin: 0 }}>
               <Users size={18} color="#10b981" /> 친구 관리
             </h2>
-            <button
-              onClick={() => { fetchFriends(); fetchFriendRequests(); }}
-              style={{
-                background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px',
-                padding: '0.4rem 0.6rem', fontSize: '0.75rem', fontWeight: '600', color: '#475569',
-                display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
-            >
-              <RefreshCw size={14} /> 갱신
-            </button>
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
