@@ -348,41 +348,28 @@ export default function MyPage() {
 
       <div className="grid" style={{ gap: '1.5rem' }}>
         {/* Profile Card */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexWrap: 'wrap' }}>
-            {/* Avatar */}
-            <div style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              color: '#000000',
-            }}>
-              <User size={40} />
-            </div>
-
-            {/* Info */}
-            <div style={{ flex: 1, minWidth: '160px' }}>
-              <>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.2rem', color: '#1e293b' }}>
-                  {user?.name || '이름 없음'}
-                </h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                  {user?.email}
-                </p>
-              </>
+        <div className="card" style={{ gridColumn: '1 / -1', paddingTop: '1rem', paddingBottom: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* Info with Icon */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b', margin: 0 }}>
+                <User size={18} color="var(--primary)" /> {user?.name || '이름 없음'}
+              </h2>
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-start', flexWrap: 'wrap' }}>
-              <button onClick={logout}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #fecaca',
-                  background: '#fff7f7', cursor: 'pointer', fontWeight: '600', color: '#ef4444'
-                }}>
-                <LogOut size={16} /> 로그아웃
-              </button>
-            </div>
+            <button onClick={logout}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #d1d5db',
+                background: '#f3f4f6', cursor: 'pointer', fontWeight: '600', color: '#6b7280', fontSize: '0.85rem'
+              }}>
+              <LogOut size={14} /> 로그아웃
+            </button>
           </div>
-
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.3rem', marginBottom: 0, marginLeft: 0 }}>
+            {user?.email}
+          </p>
         </div>
 
         {/* 내 위치 등록 카드 (Compact Grid Card) */}
