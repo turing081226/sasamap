@@ -53,16 +53,27 @@ export default function FindRoom() {
   const [dbRooms, setDbRooms] = useState([]);
 
   // Pan & Zoom state
-  const [scale, setScale] = useState(() => {
-    const isMobile = window.innerWidth < 768;
-    return isMobile ? 0.65 : 1;
-  });
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const scaleRef = useRef(1);
+  const offsetRef = useRef({ x: 0, y: 0 });
   const isPanning = useRef(false);
   const activePointerId = useRef(null);
   const lastPos = useRef({ x: 0, y: 0 });
   const containerRef = useRef(null);
-  const scaleRef = useRef(1);
+  const svgRef = useRef(null);
+  const animationFrameRef = useRef(null);
+
+  const applyTransform = (newScale, newOffset) => {
+    scaleRef.current = newScale;
+    offsetRef.current = newOffset;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    animationFrameRef.current = requestAnimationFrame(() => {
+      if (svgRef.current) {
+        svgRef.current.style.transform = `translate(${newOffset.x}px, ${newOffset.y}px) scale(${newScale})`;
+      }
+    });
+  };
 
   const clampOffset = (newX, newY, currentScale) => {
     if (!containerRef.current) return { x: newX, y: newY };
@@ -200,14 +211,9 @@ export default function FindRoom() {
 
   // Reset view when floor changes
   useEffect(() => {
-    setScale(1);
-    setOffset({ x: 0, y: 0 });
+    applyTransform(1, { x: 0, y: 0 });
     setSelectedRoom(null);
   }, [floor]);
-
-  useEffect(() => {
-    scaleRef.current = scale;
-  }, [scale]);
 
   // ---------- Mouse events ----------
   const onMouseDown = (e) => {
@@ -219,7 +225,8 @@ export default function FindRoom() {
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scaleRef.current));
+    const prevOff = offsetRef.current;
+    applyTransform(scaleRef.current, clampOffset(prevOff.x + dx, prevOff.y + dy, scaleRef.current));
   };
   const onMouseUp = () => { isPanning.current = false; };
 
@@ -238,7 +245,8 @@ export default function FindRoom() {
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scaleRef.current));
+    const prevOff = offsetRef.current;
+    applyTransform(scaleRef.current, clampOffset(prevOff.x + dx, prevOff.y + dy, scaleRef.current));
   };
   const onPointerUp = (e) => {
     if (e.pointerType !== 'touch') return;
@@ -269,16 +277,17 @@ export default function FindRoom() {
       const cx = rect.width / 2;
       const cy = rect.height / 2;
 
-      setScale(prev => {
-        const newScale = Math.min(3, Math.max(1.0, prev * delta));
-        const ratio = newScale / prev;
-        setOffset(prevOff => clampOffset(
-          cx - (cx - prevOff.x) * ratio,
-          cy - (cy - prevOff.y) * ratio,
-          newScale
-        ));
-        return newScale;
-      });
+      const prevScale = scaleRef.current;
+      const prevOff = offsetRef.current;
+      
+      const newScale = Math.min(3, Math.max(1.0, prevScale * delta));
+      const ratio = newScale / prevScale;
+      const newOffset = clampOffset(
+        cx - (cx - prevOff.x) * ratio,
+        cy - (cy - prevOff.y) * ratio,
+        newScale
+      );
+      applyTransform(newScale, newOffset);
     };
 
     const handleTouchStart = (e) => {
@@ -301,7 +310,8 @@ export default function FindRoom() {
         const dx = e.touches[0].clientX - lastPos.current.x;
         const dy = e.touches[0].clientY - lastPos.current.y;
         lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scale));
+        const prevOff = offsetRef.current;
+        applyTransform(scaleRef.current, clampOffset(prevOff.x + dx, prevOff.y + dy, scaleRef.current));
       }
       if (e.touches.length === 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -313,16 +323,17 @@ export default function FindRoom() {
           const cx = rect.width / 2;
           const cy = rect.height / 2;
 
-          setScale(prev => {
-            const newScale = Math.min(3, Math.max(1.0, prev * ratio));
-            const actualRatio = newScale / prev;
-            setOffset(prevOff => clampOffset(
-              cx - (cx - prevOff.x) * actualRatio,
-              cy - (cy - prevOff.y) * actualRatio,
-              newScale
-            ));
-            return newScale;
-          });
+          const prevScale = scaleRef.current;
+          const prevOff = offsetRef.current;
+          
+          const newScale = Math.min(3, Math.max(1.0, prevScale * ratio));
+          const actualRatio = newScale / prevScale;
+          const newOffset = clampOffset(
+            cx - (cx - prevOff.x) * actualRatio,
+            cy - (cy - prevOff.y) * actualRatio,
+            newScale
+          );
+          applyTransform(newScale, newOffset);
         }
         lastTouchDist.current = dist;
       }
@@ -385,14 +396,16 @@ export default function FindRoom() {
       >
         {/* SVG map */}
         <svg
+          ref={svgRef}
           viewBox={currentFloorConfig.viewBox}
           style={{
             position: 'absolute',
             width: '100%',
             height: '100%',
-            transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+            transform: `translate(${offsetRef.current.x}px, ${offsetRef.current.y}px) scale(${scaleRef.current})`,
             transformOrigin: '0 0',
             transition: 'none',
+            willChange: 'transform',
           }}
         >
           {floor === 1 && (
@@ -545,16 +558,17 @@ export default function FindRoom() {
                 const rect = container.getBoundingClientRect();
                 const cx = rect.width / 2;
                 const cy = rect.height / 2;
-                setScale(prev => {
-                  const newScale = Math.min(3, Math.max(1.0, prev * factor));
-                  const ratio = newScale / prev;
-                  setOffset(prevOff => clampOffset(
-                    cx - (cx - prevOff.x) * ratio,
-                    cy - (cy - prevOff.y) * ratio,
-                    newScale
-                  ));
-                  return newScale;
-                });
+                const prevScale = scaleRef.current;
+                const prevOff = offsetRef.current;
+                
+                const newScale = Math.min(3, Math.max(1.0, prevScale * factor));
+                const ratio = newScale / prevScale;
+                const newOffset = clampOffset(
+                  cx - (cx - prevOff.x) * ratio,
+                  cy - (cy - prevOff.y) * ratio,
+                  newScale
+                );
+                applyTransform(newScale, newOffset);
               }}
               style={{
                 width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border-color)',
@@ -564,7 +578,7 @@ export default function FindRoom() {
             >{label}</button>
           ))}
           <button
-            onClick={() => { setScale(1); setOffset({ x: 0, y: 0 }); }}
+            onClick={() => { applyTransform(1, { x: 0, y: 0 }); }}
             style={{
               width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border-color)',
               background: 'white', fontSize: '11px', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
