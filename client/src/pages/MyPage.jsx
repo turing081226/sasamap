@@ -478,7 +478,7 @@ export default function MyPage() {
           }} />
 
           <h2 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b' }}>
-            <MapPin size={18} color="var(--primary)" /> 📍 내 위치 등록
+            <MapPin size={18} color="var(--primary)" /> 위치 공유하기
           </h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.85rem', lineHeight: '1.4' }}>
             공강 시간에 머무는 교실을 등록하여 친구들과 실시간 위치를 공유해보세요.
@@ -613,7 +613,7 @@ export default function MyPage() {
               {submitting ? (
                 '등록 중...'
               ) : isCurrent ? (
-                <>📍 등록</>
+                <>등록</>
               ) : (
                 <>📅 예약</>
               )}
@@ -687,7 +687,7 @@ export default function MyPage() {
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', color: '#1e293b', margin: 0 }}>
-              <Users size={18} color="#10b981" /> 👥 내 친구
+              <Users size={18} color="#10b981" /> 친구 관리
             </h2>
             <button
               onClick={() => { fetchFriends(); fetchFriendRequests(); }}
@@ -725,7 +725,7 @@ export default function MyPage() {
                   onClick={handleRequestFriend}
                   disabled={friendLoading}
                   style={{
-                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    background: 'linear-gradient(135deg, #109db9, #109db9)',
                     color: 'white', border: 'none', borderRadius: '8px', padding: '0 1rem',
                     fontWeight: '600', cursor: friendLoading ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', gap: '4px'
@@ -762,7 +762,7 @@ export default function MyPage() {
             {/* 승인된 친구 목록 (현재 위치 포함) */}
             <div>
               <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <CheckCircle size={14} /> 내 친구 목록 ({friends.length})
+                <CheckCircle size={14} /> 친구들 ({friends.length})
               </h3>
               {friends.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
