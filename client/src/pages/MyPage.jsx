@@ -51,7 +51,7 @@ const getDayName = (id) => {
 };
 
 export default function MyPage() {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout } = useAuth();
   const token = 'cookie-auth';
   const showNotification = useToast();
   // Location occupancy states
@@ -364,24 +364,14 @@ export default function MyPage() {
 
             {/* Info */}
             <div style={{ flex: 1, minWidth: '160px' }}>
-              {isEditing ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <div>
-                    <label style={labelStyle}>이름</label>
-                    <input style={inputStyle} value={form.name}
-                      onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.2rem', color: '#1e293b' }}>
-                    {user?.name || '이름 없음'}
-                  </h2>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                    {user?.email}
-                  </p>
-                </>
-              )}
+              <>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.2rem', color: '#1e293b' }}>
+                  {user?.name || '이름 없음'}
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>
+                  {user?.email}
+                </p>
+              </>
             </div>
 
             {/* Action buttons */}
