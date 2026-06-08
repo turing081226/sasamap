@@ -367,9 +367,6 @@ export default function MyPage() {
               <LogOut size={14} /> 로그아웃
             </button>
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.3rem', marginBottom: 0, marginLeft: 0 }}>
-            {user?.email}
-          </p>
         </div>
 
         {/* 내 위치 등록 카드 (Compact Grid Card) */}
