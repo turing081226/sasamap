@@ -59,8 +59,10 @@ export default function FindRoom() {
   });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const isPanning = useRef(false);
+  const activePointerId = useRef(null);
   const lastPos = useRef({ x: 0, y: 0 });
   const containerRef = useRef(null);
+  const scaleRef = useRef(1);
 
   const clampOffset = (newX, newY, currentScale) => {
     if (!containerRef.current) return { x: newX, y: newY };
@@ -203,6 +205,10 @@ export default function FindRoom() {
     setSelectedRoom(null);
   }, [floor]);
 
+  useEffect(() => {
+    scaleRef.current = scale;
+  }, [scale]);
+
   // ---------- Mouse events ----------
   const onMouseDown = (e) => {
     isPanning.current = true;
@@ -213,9 +219,40 @@ export default function FindRoom() {
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scale));
+    setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scaleRef.current));
   };
   const onMouseUp = () => { isPanning.current = false; };
+
+  const onPointerDown = (e) => {
+    if (e.pointerType !== 'touch') return;
+    e.preventDefault();
+    isPanning.current = true;
+    activePointerId.current = e.pointerId;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    if (containerRef.current && containerRef.current.setPointerCapture) {
+      containerRef.current.setPointerCapture(e.pointerId);
+    }
+  };
+  const onPointerMove = (e) => {
+    if (e.pointerType !== 'touch' || !isPanning.current || activePointerId.current !== e.pointerId) return;
+    const dx = e.clientX - lastPos.current.x;
+    const dy = e.clientY - lastPos.current.y;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    setOffset(prev => clampOffset(prev.x + dx, prev.y + dy, scaleRef.current));
+  };
+  const onPointerUp = (e) => {
+    if (e.pointerType !== 'touch') return;
+    isPanning.current = false;
+    activePointerId.current = null;
+    if (containerRef.current && containerRef.current.releasePointerCapture) {
+      containerRef.current.releasePointerCapture(e.pointerId);
+    }
+  };
+  const onPointerCancel = (e) => {
+    if (e.pointerType !== 'touch') return;
+    isPanning.current = false;
+    activePointerId.current = null;
+  };
 
   // ---------- Touch & Wheel manual listeners (non-passive) ----------
   const lastTouchDist = useRef(null);
@@ -245,7 +282,8 @@ export default function FindRoom() {
     };
 
     const handleTouchStart = (e) => {
-      if (e.touches.length === 1) {
+      const supportsPointerEvents = typeof window !== 'undefined' && window.PointerEvent;
+      if (e.touches.length === 1 && !supportsPointerEvents) {
         isPanning.current = true;
         lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
@@ -258,7 +296,8 @@ export default function FindRoom() {
 
     const handleTouchMove = (e) => {
       e.preventDefault();
-      if (e.touches.length === 1 && isPanning.current) {
+      const supportsPointerEvents = typeof window !== 'undefined' && window.PointerEvent;
+      if (e.touches.length === 1 && !supportsPointerEvents && isPanning.current) {
         const dx = e.touches[0].clientX - lastPos.current.x;
         const dy = e.touches[0].clientY - lastPos.current.y;
         lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -326,6 +365,10 @@ export default function FindRoom() {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
         style={{
           width: '100%',
           height: '400px',
