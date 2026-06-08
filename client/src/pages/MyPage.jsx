@@ -352,14 +352,10 @@ export default function MyPage() {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexWrap: 'wrap' }}>
             {/* Avatar */}
             <div style={{
-              width: 72, height: 72, minWidth: 72,
-              background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
-              borderRadius: '50%',
               display: 'flex', justifyContent: 'center', alignItems: 'center',
-              color: 'white', fontSize: '1.8rem', fontWeight: 'bold',
-              boxShadow: '0 4px 10px rgba(37,99,235,0.2)',
+              color: '#000000',
             }}>
-              <User size={32} />
+              <User size={40} />
             </div>
 
             {/* Info */}
@@ -517,12 +513,8 @@ export default function MyPage() {
               disabled={submitting || !selectedRoomId}
               style={{
                 width: '100%', padding: '0.55rem', borderRadius: '8px', border: 'none',
-                background: !selectedRoomId
-                  ? '#cbd5e1'
-                  : isCurrent
-                    ? '#fca5a5'
-                    : '#93c5fd',
-                color: !selectedRoomId ? 'white' : (isCurrent ? '#1d7a7f' : '#1e3a8a'),
+                background: !selectedRoomId ? '#cbd5e1' : '#93c5fd',
+                color: !selectedRoomId ? 'white' : '#000000',
                 fontWeight: '700', fontSize: '0.9rem', cursor: !selectedRoomId ? 'not-allowed' : 'pointer',
                 boxShadow: selectedRoomId ? '0 2px 5px rgba(0,0,0,0.05)' : 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
