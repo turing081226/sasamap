@@ -13,10 +13,11 @@ const MOCK_TIMETABLES = [
   { id: 5, teacher_name: '이국어', subject: '국어', room_name: '1-3반', day_of_week: 4, period: 5 },
 ];
 
-const emptyForm = { teacher_name: '', subject: '', room_id: '', day_of_week: 1, period: 1 };
+const emptyForm = { teacher_id: '', teacher_name: '', subject: '', room_id: '', day_of_week: 1, period: 1 };
 
 export default function TimetableManager() {
   const [items, setItems] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [usingMock, setUsingMock] = useState(false);
@@ -32,11 +33,13 @@ export default function TimetableManager() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/timetables`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (!res.ok) throw new Error();
-      setItems(await res.json());
+      const [resTT, resTeachers] = await Promise.all([
+        fetch(`${API}/admin/timetables`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+        fetch(`${API}/admin/teachers`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      ]);
+      if (!resTT.ok) throw new Error();
+      setItems(await resTT.json());
+      if (resTeachers.ok) setTeachers(await resTeachers.json());
       setUsingMock(false);
     } catch {
       setItems(MOCK_TIMETABLES);
@@ -48,12 +51,14 @@ export default function TimetableManager() {
 
   // ── CRUD ──
   const handleAdd = async () => {
-    if (!form.subject || !form.teacher_name) return showToast('⚠️ 과목명과 교사명은 필수입니다.');
+    if (!form.subject || (!form.teacher_id && !form.teacher_name)) return showToast('⚠️ 과목명과 교사명은 필수입니다.');
+    const selectedTeacher = teachers.find(t => t.id === form.teacher_id);
+    const finalForm = { ...form, teacher_name: selectedTeacher ? selectedTeacher.name : form.teacher_name };
     try {
       if (!usingMock) {
         const res = await fetch(`${API}/admin/timetables`, {
           method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-          body: JSON.stringify(form),
+          body: JSON.stringify(finalForm),
         });
         if (!res.ok) throw new Error();
         await fetchData(); // Reload to get joined room_name
@@ -72,15 +77,17 @@ export default function TimetableManager() {
 
   const startEdit = (item) => {
     setEditingId(item.id);
-    setForm({ teacher_name: item.teacher_name, subject: item.subject, room_id: item.room_id || '', day_of_week: item.day_of_week, period: item.period });
+    setForm({ teacher_id: item.teacher_id || '', teacher_name: item.teacher_name || '', subject: item.subject, room_id: item.room_id || '', day_of_week: item.day_of_week, period: item.period });
   };
 
   const handleUpdate = async () => {
+    const selectedTeacher = teachers.find(t => t.id === form.teacher_id);
+    const finalForm = { ...form, teacher_name: selectedTeacher ? selectedTeacher.name : form.teacher_name };
     try {
       if (!usingMock) {
         const res = await fetch(`${API}/admin/timetables/${editingId}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-          body: JSON.stringify(form),
+          body: JSON.stringify(finalForm),
         });
         if (!res.ok) throw new Error();
         await fetchData(); // Reload to get correct room_name
@@ -163,8 +170,13 @@ export default function TimetableManager() {
   const renderFormRow = (onSave, onCancel, saveLabel) => (
     <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', marginBottom: '1rem', border: '1px solid #e2e8f0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
-        <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>교사명 *</label>
-          <input style={inputSt} value={form.teacher_name} onChange={e => setForm(f => ({ ...f, teacher_name: e.target.value }))} /></div>
+        <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>교사 선택 *</label>
+          <select style={inputSt} value={form.teacher_id} onChange={e => setForm(f => ({ ...f, teacher_id: e.target.value ? Number(e.target.value) : '' }))}>
+            <option value="">직접 입력</option>
+            {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+          {!form.teacher_id && <input style={{...inputSt, marginTop: '4px'}} placeholder="교사명 입력" value={form.teacher_name} onChange={e => setForm(f => ({ ...f, teacher_name: e.target.value }))} />}
+        </div>
         <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>과목 *</label>
           <input style={inputSt} value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} /></div>
         <div><label style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>교실 ID</label>

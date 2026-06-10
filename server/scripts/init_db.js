@@ -44,6 +44,17 @@ async function initDB() {
     `);
     console.log('Table `rooms` ready.');
 
+    // Create Teachers Table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS teachers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        office_room_id INT,
+        FOREIGN KEY (office_room_id) REFERENCES rooms(id) ON DELETE SET NULL
+      )
+    `);
+    console.log('Table `teachers` ready.');
+
     // Create Timetables Table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS timetables (
@@ -54,7 +65,7 @@ async function initDB() {
         room_id INT,
         day_of_week INT NOT NULL COMMENT '1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri',
         period INT NOT NULL COMMENT '1 to 7',
-        FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL,
         FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
       )
     `);

@@ -94,6 +94,58 @@ exports.uploadTimetable = async (req, res) => {
   }
 };
 
+// ─── Teachers ──────────────────────────────────────────────────────
+exports.getAllTeachers = async (req, res) => {
+  try {
+    const [teachers] = await pool.query(`
+      SELECT t.id, t.name, t.office_room_id, r.name AS office_room_name
+      FROM teachers t
+      LEFT JOIN rooms r ON t.office_room_id = r.id
+      ORDER BY t.name
+    `);
+    res.json(teachers);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to retrieve teachers', error: err.message });
+  }
+};
+
+exports.createTeacher = async (req, res) => {
+  try {
+    const { name, office_room_id } = req.body;
+    const [result] = await pool.query(
+      'INSERT INTO teachers (name, office_room_id) VALUES (?, ?)',
+      [name, office_room_id || null]
+    );
+    res.json({ message: 'Teacher created successfully', id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to create teacher', error: err.message });
+  }
+};
+
+exports.updateTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, office_room_id } = req.body;
+    await pool.query(
+      'UPDATE teachers SET name = ?, office_room_id = ? WHERE id = ?',
+      [name, office_room_id || null, id]
+    );
+    res.json({ message: 'Teacher updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update teacher', error: err.message });
+  }
+};
+
+exports.deleteTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM teachers WHERE id = ?', [id]);
+    res.json({ message: 'Teacher deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete teacher', error: err.message });
+  }
+};
+
 // ─── Rooms ───────────────────────────────────────────────────────
 exports.getAllRooms = async (req, res) => {
   try {

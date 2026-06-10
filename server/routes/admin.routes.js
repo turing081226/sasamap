@@ -16,6 +16,11 @@ router.post('/timetables', adminController.createTimetable);
 router.put('/timetables/:id', adminController.updateTimetable);
 router.delete('/timetables/:id', adminController.deleteTimetable);
 router.post('/timetable', adminController.uploadTimetable); // bulk upload
+// Teachers
+router.get('/teachers', adminController.getAllTeachers);
+router.post('/teachers', adminController.createTeacher);
+router.put('/teachers/:id', adminController.updateTeacher);
+router.delete('/teachers/:id', adminController.deleteTeacher);
 
 // Rooms
 router.get('/rooms', adminController.getAllRooms);

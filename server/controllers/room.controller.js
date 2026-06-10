@@ -70,7 +70,7 @@ exports.getAvailableRooms = async (req, res) => {
     const [rooms] = await pool.query(`
       SELECT id, name, floor, type, description 
       FROM rooms 
-      WHERE status != 'MAINTENANCE' 
+      WHERE status NOT IN ('MAINTENANCE', 'UNAVAILABLE', 'NEEDS_APPROVAL')
         AND id NOT IN (
           SELECT room_id FROM timetables 
           WHERE day_of_week = ? AND period = ? AND room_id IS NOT NULL

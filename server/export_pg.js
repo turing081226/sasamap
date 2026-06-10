@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS user_timetables CASCADE;
 DROP TABLE IF EXISTS user_plans CASCADE;
 DROP TABLE IF EXISTS user_notifications CASCADE;
 DROP TABLE IF EXISTS timetables CASCADE;
+DROP TABLE IF EXISTS teachers CASCADE;
 DROP TABLE IF EXISTS rooms CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -30,9 +31,15 @@ CREATE TABLE rooms (
   description VARCHAR(255) DEFAULT NULL
 );
 
+CREATE TABLE teachers (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  office_room_id INT REFERENCES rooms(id) ON DELETE SET NULL
+);
+
 CREATE TABLE timetables (
   id SERIAL PRIMARY KEY,
-  teacher_id INT REFERENCES users(id) ON DELETE SET NULL,
+  teacher_id INT REFERENCES teachers(id) ON DELETE SET NULL,
   teacher_name VARCHAR(100) DEFAULT NULL,
   subject VARCHAR(100) NOT NULL,
   room_id INT REFERENCES rooms(id) ON DELETE SET NULL,
@@ -75,7 +82,7 @@ CREATE TABLE user_timetables (
     return `'${s}'`;
   };
 
-  const tables = ['users', 'rooms', 'timetables', 'user_notifications', 'user_plans', 'user_timetables'];
+  const tables = ['users', 'rooms', 'teachers', 'timetables', 'user_notifications', 'user_plans', 'user_timetables'];
 
   for (const t of tables) {
     const [rows] = await pool.query('SELECT * FROM ' + t);
