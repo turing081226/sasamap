@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search as SearchIcon, MapPin, BookOpen, User, Filter } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -30,8 +31,7 @@ export default function Search() {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
-        const response = await fetch(`${API}/search?q=${encodeURIComponent(query)}&type=${searchType}`);
+        const response = await apiFetch(`/search?q=${encodeURIComponent(query)}&type=${searchType}`);
         if (!response.ok) throw new Error('Search failed');
         const data = await response.json();
         setResults(data);

@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Plus, Trash2, X, Search, Edit2, Check, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+import { apiFetch } from '../lib/api';
 
 const DAYS = [
   { id: 1, label: '월' },
@@ -79,7 +78,7 @@ export default function Timetable() {
     setLoading(true);
     try {
       // 1. Fetch user timetable
-      const userRes = await fetch(`${API}/mypage/timetable`, {
+      const userRes = await apiFetch('/mypage/timetable', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       let userData = [];
@@ -89,7 +88,7 @@ export default function Timetable() {
       }
 
       // 2. Fetch school master timetable
-      const masterRes = await fetch(`${API}/rooms/timetables`, {
+      const masterRes = await apiFetch('/rooms/timetables', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (masterRes.ok) {
@@ -117,7 +116,7 @@ export default function Timetable() {
   const saveTimetableToServer = async (newTimetable) => {
     setIsSaving(true);
     try {
-      const res = await fetch(`${API}/mypage/timetable`, {
+      const res = await apiFetch('/mypage/timetable', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

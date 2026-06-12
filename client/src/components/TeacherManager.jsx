@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit3, Trash2, Search, X, Save, UserCheck } from 'lucide-react';
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+import { apiFetch } from '../lib/api';
 
 const emptyForm = { name: '', office_room_id: '' };
 
@@ -21,8 +20,8 @@ export default function TeacherManager() {
     setLoading(true);
     try {
       const [resTeachers, resRooms] = await Promise.all([
-        fetch(`${API}/admin/teachers`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
-        fetch(`${API}/admin/rooms`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        apiFetch('/admin/teachers', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+        apiFetch('/admin/rooms', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       ]);
       
       if (resTeachers.ok) setTeachers(await resTeachers.json());
@@ -40,7 +39,7 @@ export default function TeacherManager() {
   const handleAdd = async () => {
     if (!form.name.trim()) return showToast('⚠️ 교사명은 필수입니다.');
     try {
-      const res = await fetch(`${API}/admin/teachers`, {
+      const res = await apiFetch('/admin/teachers', {
         method: 'POST', 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify(form),
@@ -61,7 +60,7 @@ export default function TeacherManager() {
   const handleUpdate = async () => {
     if (!form.name.trim()) return showToast('⚠️ 교사명은 필수입니다.');
     try {
-      const res = await fetch(`${API}/admin/teachers/${editingId}`, {
+      const res = await apiFetch(`/admin/teachers/${editingId}`, {
         method: 'PUT', 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify(form),
@@ -77,7 +76,7 @@ export default function TeacherManager() {
   const handleDelete = async (id) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API}/admin/teachers/${id}`, {
+      const res = await apiFetch(`/admin/teachers/${id}`, {
         method: 'DELETE', 
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });

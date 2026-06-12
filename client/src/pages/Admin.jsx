@@ -4,8 +4,7 @@ import TimetableManager from '../components/TimetableManager';
 import RoomManager from '../components/RoomManager';
 import TeacherManager from '../components/TeacherManager';
 import { useAuth } from '../contexts/AuthContext';
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+import { apiFetch } from '../lib/api';
 
 // ─── Mock fallback (DB 연결 안 됐을 때) ────────────────────────
 const MOCK_USERS = [
@@ -34,7 +33,7 @@ export default function Admin() {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/users`, {
+      const res = await apiFetch('/admin/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error('API error');
@@ -57,7 +56,7 @@ export default function Admin() {
     setUpdating(u.id);
     try {
       if (!usingMock) {
-        const res = await fetch(`${API}/admin/users/${u.id}/role`, {
+        const res = await apiFetch(`/admin/users/${u.id}/role`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

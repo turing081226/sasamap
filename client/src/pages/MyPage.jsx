@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Bell, LogOut, MapPin, Trash2, Clock, Check, Users, UserPlus, CheckCircle, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+import { apiFetch } from '../lib/api';
 
 const DAYS = [
   { id: 1, label: '월' },
@@ -77,7 +76,7 @@ export default function MyPage() {
   const fetchMyOccupancies = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${API}/mypage/occupancy`, {
+      const res = await apiFetch('/mypage/occupancy', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -94,7 +93,7 @@ export default function MyPage() {
     if (!token) return;
     setLoadingAvailable(true);
     try {
-      const res = await fetch(`${API}/rooms/available?day_of_week=${day}&period=${period}`, {
+      const res = await apiFetch(`/rooms/available?day_of_week=${day}&period=${period}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -122,7 +121,7 @@ export default function MyPage() {
   const fetchFriends = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${API}/friends`, {
+      const res = await apiFetch('/friends', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -137,7 +136,7 @@ export default function MyPage() {
   const fetchFriendRequests = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${API}/friends/requests`, {
+      const res = await apiFetch('/friends/requests', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -153,7 +152,7 @@ export default function MyPage() {
     if (!friendEmail.trim()) { showNotification('error', '이메일을 입력해주세요.'); return; }
     setFriendLoading(true);
     try {
-      const res = await fetch(`${API}/friends/request`, {
+      const res = await apiFetch('/friends/request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +176,7 @@ export default function MyPage() {
 
   const handleAcceptFriend = async (id) => {
     try {
-      const res = await fetch(`${API}/friends/${id}/accept`, {
+      const res = await apiFetch(`/friends/${id}/accept`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -197,7 +196,7 @@ export default function MyPage() {
   const handleDeleteFriend = async (id) => {
     if (!window.confirm('정말로 삭제/거절하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API}/friends/${id}`, {
+      const res = await apiFetch(`/friends/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -226,7 +225,7 @@ export default function MyPage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/mypage/occupancy`, {
+      const res = await apiFetch('/mypage/occupancy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -257,7 +256,7 @@ export default function MyPage() {
   const handleCancelOccupancy = async (id) => {
     if (!window.confirm('위치 정보를 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API}/mypage/occupancy/${id}`, {
+      const res = await apiFetch(`/mypage/occupancy/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

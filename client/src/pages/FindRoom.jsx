@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, Loader2, Compass, MapPin } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { apiFetch } from '../lib/api';
 
 import { floorData } from './floorData';
 
@@ -78,11 +79,19 @@ export default function FindRoom() {
   const clampOffset = (newX, newY, currentScale) => {
     if (!containerRef.current) return { x: newX, y: newY };
     const rect = containerRef.current.getBoundingClientRect();
-    const minX = rect.width * (1 - currentScale);
-    const minY = rect.height * (1 - currentScale);
+    
+    // 화면 크기의 80% 정도 여유 공간(margin)을 두어, 배율이 1일 때도 자유롭게 패닝할 수 있도록 허용합니다.
+    const marginX = rect.width * 0.8;
+    const marginY = rect.height * 0.8;
+    
+    const minX = rect.width * (1 - currentScale) - marginX;
+    const minY = rect.height * (1 - currentScale) - marginY;
+    const maxX = marginX;
+    const maxY = marginY;
+    
     return {
-      x: Math.min(Math.max(newX, minX), 0),
-      y: Math.min(Math.max(newY, minY), 0)
+      x: Math.min(Math.max(newX, minX), maxX),
+      y: Math.min(Math.max(newY, minY), maxY)
     };
   };
 
@@ -90,8 +99,7 @@ export default function FindRoom() {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
-        const res = await fetch(`${API}/rooms`);
+        const res = await apiFetch('/rooms');
         if (res.ok) {
           const data = await res.json();
           setDbRooms(data);
@@ -107,8 +115,7 @@ export default function FindRoom() {
     // Fetch all timetables for dynamic map state
     const fetchTimetables = async () => {
       try {
-        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
-        const res = await fetch(`${API}/rooms/timetables`);
+        const res = await apiFetch('/rooms/timetables');
         if (res.ok) {
           const data = await res.json();
           setTimetables(data);
@@ -121,8 +128,7 @@ export default function FindRoom() {
     // Fetch all user occupancies for real-time occupancy status
     const fetchOccupancies = async () => {
       try {
-        const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
-        const res = await fetch(`${API}/rooms/occupancies`);
+        const res = await apiFetch('/rooms/occupancies');
         if (res.ok) {
           const data = await res.json();
           setOccupancies(data);

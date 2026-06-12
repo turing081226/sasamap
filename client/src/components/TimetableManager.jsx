@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Edit3, Trash2, Search, Upload, Download, X, Save, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { apiFetch } from '../lib/api';
 
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 const DAYS = ['', '월', '화', '수', '목', '금'];
 
 const MOCK_TIMETABLES = [
@@ -34,8 +34,8 @@ export default function TimetableManager() {
     setLoading(true);
     try {
       const [resTT, resTeachers] = await Promise.all([
-        fetch(`${API}/admin/timetables`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
-        fetch(`${API}/admin/teachers`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        apiFetch('/admin/timetables', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+        apiFetch('/admin/teachers', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       ]);
       if (!resTT.ok) throw new Error();
       setItems(await resTT.json());
@@ -56,7 +56,7 @@ export default function TimetableManager() {
     const finalForm = { ...form, teacher_name: selectedTeacher ? selectedTeacher.name : form.teacher_name };
     try {
       if (!usingMock) {
-        const res = await fetch(`${API}/admin/timetables`, {
+        const res = await apiFetch('/admin/timetables', {
           method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
           body: JSON.stringify(finalForm),
         });
@@ -85,7 +85,7 @@ export default function TimetableManager() {
     const finalForm = { ...form, teacher_name: selectedTeacher ? selectedTeacher.name : form.teacher_name };
     try {
       if (!usingMock) {
-        const res = await fetch(`${API}/admin/timetables/${editingId}`, {
+        const res = await apiFetch(`/admin/timetables/${editingId}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
           body: JSON.stringify(finalForm),
         });
@@ -107,7 +107,7 @@ export default function TimetableManager() {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       if (!usingMock) {
-        const res = await fetch(`${API}/admin/timetables/${id}`, {
+        const res = await apiFetch(`/admin/timetables/${id}`, {
           method: 'DELETE', headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (!res.ok) throw new Error();
@@ -135,7 +135,7 @@ export default function TimetableManager() {
           period: Number(r['교시'] || r['period'] || 1),
         }));
         if (!usingMock) {
-          await fetch(`${API}/admin/timetable`, {
+          await apiFetch('/admin/timetable', {
             method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ timetables: mapped }),
           });

@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { apiFetch } from '../lib/api';
 
 const AuthContext = createContext(null);
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   // 실제 구글 로그인 성공 시 호출
   const googleLogin = async (credentialResponse) => {
     try {
-      const res = await fetch(`${API}/auth/google`, {
+      const res = await apiFetch('/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: credentialResponse.credential }),
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch(`${API}/auth/logout`, { method: 'POST' });
+      await apiFetch('/auth/logout', { method: 'POST' });
     } catch (e) {
       console.error('Logout error', e);
     }

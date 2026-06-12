@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Database, Search, RefreshCw, Edit2, Trash2, Plus, X, Save } from 'lucide-react';
-
-const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+import { apiFetch } from '../lib/api';
 
 const STATUS_OPTIONS = [
   { value: 'EMPTY', label: '빈 교실' },
@@ -34,7 +33,7 @@ export default function RoomManager() {
   const fetchRooms = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/rooms`, {
+      const res = await apiFetch('/admin/rooms', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error('API error');
@@ -52,7 +51,7 @@ export default function RoomManager() {
   const updateStatus = async (id, newStatus) => {
     setUpdating(id);
     try {
-      const res = await fetch(`${API}/admin/rooms/${id}/status`, {
+      const res = await apiFetch(`/admin/rooms/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +72,7 @@ export default function RoomManager() {
   const handleDeleteRoom = async (id) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API}/admin/rooms/${id}`, {
+      const res = await apiFetch(`/admin/rooms/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -110,7 +109,7 @@ export default function RoomManager() {
     try {
       if (editingId) {
         // Edit
-        const res = await fetch(`${API}/admin/rooms/${editingId}`, {
+        const res = await apiFetch(`/admin/rooms/${editingId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +123,7 @@ export default function RoomManager() {
         setEditingId(null);
       } else {
         // Add
-        const res = await fetch(`${API}/admin/rooms`, {
+        const res = await apiFetch('/admin/rooms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
