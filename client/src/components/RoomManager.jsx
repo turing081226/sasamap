@@ -33,9 +33,7 @@ export default function RoomManager() {
   const fetchRooms = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/admin/rooms', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await apiFetch('/admin/rooms');
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
       setRooms(data);
@@ -53,10 +51,7 @@ export default function RoomManager() {
     try {
       const res = await apiFetch(`/admin/rooms/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error();
@@ -74,7 +69,6 @@ export default function RoomManager() {
     try {
       const res = await apiFetch(`/admin/rooms/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error();
       setRooms(prev => prev.filter(r => r.id !== id));
@@ -111,10 +105,7 @@ export default function RoomManager() {
         // Edit
         const res = await apiFetch(`/admin/rooms/${editingId}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
         if (!res.ok) throw new Error();
@@ -125,10 +116,7 @@ export default function RoomManager() {
         // Add
         const res = await apiFetch('/admin/rooms', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
         if (!res.ok) throw new Error();
