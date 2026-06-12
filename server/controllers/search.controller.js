@@ -45,11 +45,9 @@ exports.searchAll = async (req, res) => {
     // 1. 교사 검색
     if (searchType === 'all' || searchType === 'teacher') {
       const [rows] = await pool.query(
-        `SELECT t.teacher_name, t.subject, t.day_of_week, t.period, r.name as room_name, tc.office_room_id, r2.name as office_name
+        `SELECT t.teacher_name, t.subject, t.day_of_week, t.period, r.name as room_name
          FROM timetables t 
          LEFT JOIN rooms r ON t.room_id = r.id
-         LEFT JOIN teachers tc ON tc.id = t.teacher_id OR tc.name = t.teacher_name
-         LEFT JOIN rooms r2 ON tc.office_room_id = r2.id
          WHERE t.teacher_name LIKE ?
          ORDER BY t.teacher_name, t.day_of_week, t.period`,
         [searchQuery]
@@ -72,11 +70,10 @@ exports.searchAll = async (req, res) => {
         // Format detailed timetable schedule slots
         const details = formatDetails(slots, s => `${s.subject || '과목 미지정'} ${s.teacher_name || teacherName} 선생님 (${s.room_name || '장소 미지정'})`);
 
-        const office = slots[0]?.office_name ? ` (교무실: ${slots[0].office_name})` : '';
         results.push({
           id: `teacher_${teacherName}`,
           type: '교사',
-          title: `${teacherName} 선생님${office}`,
+          title: `${teacherName} 선생님`,
           subtitle: `담당 과목: ${uniqueSubjects.join(', ') || '없음'}`,
           location: slots[0]?.room_name || '위치 미정',
           details: details

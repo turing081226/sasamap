@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Users, Database, Search, Shield, ShieldOff, RefreshCw } from 'lucide-react';
 import TimetableManager from '../components/TimetableManager';
 import RoomManager from '../components/RoomManager';
-import TeacherManager from '../components/TeacherManager';
 import { useAuth } from '../contexts/AuthContext';
 import { apiFetch } from '../lib/api';
 
@@ -102,12 +101,6 @@ export default function Admin() {
           className="btn" 
           style={{ background: activeTab === 'TIMETABLES' ? 'var(--primary)' : '#e2e8f0', color: activeTab === 'TIMETABLES' ? 'white' : 'var(--text-main)', whiteSpace: 'nowrap' }}>
           수업 데이터 관리
-        </button>
-        <button 
-          onClick={() => setActiveTab('TEACHERS')}
-          className="btn" 
-          style={{ background: activeTab === 'TEACHERS' ? 'var(--primary)' : '#e2e8f0', color: activeTab === 'TEACHERS' ? 'white' : 'var(--text-main)', whiteSpace: 'nowrap' }}>
-          교사 데이터 관리
         </button>
         <button 
           onClick={() => setActiveTab('ROOMS')}
@@ -232,9 +225,6 @@ export default function Admin() {
           </div>
         </>
       )}
-
-      {/* ── 교사 데이터 관리 ── */}
-      {activeTab === 'TEACHERS' && <TeacherManager />}
 
       {/* ── 수업 데이터 관리 ── */}
       {activeTab === 'TIMETABLES' && <TimetableManager />}
