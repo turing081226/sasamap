@@ -17,6 +17,18 @@ const statusColor = {
 const MAP_W = 500;
 const MAP_H = 320;
 
+const normalizeRoomKey = (value) => String(value || '')
+  .toLowerCase()
+  .replace(/\s+/g, '')
+  .replace(/[()]/g, '')
+  .replace(/[^a-z0-9가-힣]/g, '');
+
+const sameRoom = (a, b) => {
+  const left = normalizeRoomKey(a);
+  const right = normalizeRoomKey(b);
+  return Boolean(left && right && left === right);
+};
+
 const PERIODS = [
   { id: 1, label: "1교시", time: "08:40-09:30" },
   { id: 2, label: "2교시", time: "09:40-10:30" },
@@ -157,7 +169,7 @@ export default function FindRoom() {
 
   const rooms = baseRooms.map(room => {
     // Check DB status first to see if it's MAINTENANCE, UNAVAILABLE, or NEEDS_APPROVAL
-    const dbRoom = dbRooms.find(r => r.name === room.name);
+    const dbRoom = dbRooms.find(r => sameRoom(r.name, room.name) || sameRoom(r.name, room.id));
     const status = dbRoom ? dbRoom.status : room.status;
     // Prefer DB description; otherwise use room.description; fallback to '-'
     const description = (dbRoom && dbRoom.description) ? dbRoom.description : (room.description ? room.description : '-');
@@ -173,7 +185,7 @@ export default function FindRoom() {
     if (currentDay >= 1 && currentDay <= 5 && currentPeriod) {
       // 1. Regular Timetable Class (CLASS)
       const activeClass = timetables.find(t => 
-        (t.room_name === room.name || t.room_id === room.id) && 
+        (sameRoom(t.room_name, room.name) || sameRoom(t.room_name, room.id) || sameRoom(t.room_id, dbRoom?.id)) &&
         t.day_of_week === currentDay && 
         t.period === currentPeriod
       );
@@ -187,7 +199,7 @@ export default function FindRoom() {
 
       // 2. User Voluntary Occupancy (IN_USE)
       const roomOccupancies = occupancies.filter(occ =>
-        (occ.room_name === room.name || occ.room_id === room.id) &&
+        (sameRoom(occ.room_name, room.name) || sameRoom(occ.room_name, room.id) || sameRoom(occ.room_id, dbRoom?.id)) &&
         occ.day_of_week === currentDay &&
         occ.period === currentPeriod
       );
