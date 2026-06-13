@@ -6,11 +6,7 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        로딩중...
-      </div>
-    );
+    return <div className="empty-state">로그인 상태를 확인하는 중입니다.</div>;
   }
 
   if (!user) {

@@ -1,160 +1,163 @@
-import { useState, useEffect } from 'react';
-import { Search as SearchIcon, MapPin, BookOpen, User, Filter } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, ChevronRight, MapPin, Search as SearchIcon, UserRound } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 
+const filters = [
+  { value: 'all', label: '전체' },
+  { value: 'room', label: '교실' },
+  { value: 'subject', label: '과목' },
+  { value: 'teacher', label: '교사' },
+];
+
+const typeMeta = {
+  교실: { label: '교실', icon: MapPin, className: 'green' },
+  과목: { label: '과목', icon: BookOpen, className: 'blue' },
+  교사: { label: '교사', icon: UserRound, className: 'purple' },
+};
+
+const getTypeMeta = (type = '') => {
+  if (type.includes('교실')) return typeMeta.교실;
+  if (type.includes('과목')) return typeMeta.과목;
+  if (type.includes('교사') || type.includes('선생')) return typeMeta.교사;
+  return { label: type || '정보', icon: SearchIcon, className: 'gray' };
+};
+
+const getRoomTarget = (item) => {
+  if (item?.location && item.location !== '-') return item.location;
+  const match = String(item?.title || '').match(/[AS]\d{3}(?:-\d)?/i);
+  return match?.[0] || '';
+};
+
 export default function Search() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [searchType, setSearchType] = useState('all'); // all -> room -> subject -> teacher
+  const [searchType, setSearchType] = useState('all');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expandedId, setExpandedId] = useState(null);
+  const [selectedResult, setSelectedResult] = useState(null);
 
-  // Cycle through search types
-  const toggleSearchType = () => {
-    const types = ['all', 'room', 'subject', 'teacher'];
-    const currentIndex = types.indexOf(searchType);
-    setSearchType(types[(currentIndex + 1) % types.length]);
-  };
-
-  const getSearchTypeLabel = (type) => {
-    switch (type) {
-      case 'all': return '전체 검색';
-      case 'room': return '🏫 교실 검색';
-      case 'subject': return '📚 과목 검색';
-      case 'teacher': return '👨‍🏫 교사 검색';
-      default: return '전체';
-    }
-  };
-
-  // Trigger search when query or type changes
   useEffect(() => {
+    const controller = new AbortController();
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const response = await apiFetch(`/search?q=${encodeURIComponent(query)}&type=${searchType}`);
+        const response = await apiFetch(`/search?q=${encodeURIComponent(query)}&type=${searchType}`, {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error('Search failed');
-        const data = await response.json();
-        setResults(data);
+        setResults(await response.json());
       } catch (err) {
-        console.error(err);
+        if (err.name !== 'AbortError') {
+          console.error(err);
+          setResults([]);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
-    // Debounce to prevent too many requests, but trigger immediately for initial empty load
-    const timeoutId = setTimeout(() => {
-      fetchResults();
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
+    const timer = setTimeout(fetchResults, 250);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, searchType]);
 
-  const renderIcon = (type) => {
-    switch (type) {
-      case '교사': return <User size={16} />;
-      case '교실': return <MapPin size={16} />;
-      case '과목': return <BookOpen size={16} />;
-      default: return null;
-    }
-  };
+  const selectedRoomTarget = useMemo(() => getRoomTarget(selectedResult), [selectedResult]);
 
-  const getBadgeColor = (type) => {
-    switch (type) {
-      case '교사': return 'bg-blue';
-      case '교실': return 'bg-green';
-      case '과목': return 'bg-purple';
-      default: return 'bg-blue';
-    }
+  const openOnMap = () => {
+    if (!selectedRoomTarget) return;
+    setSelectedResult(null);
+    navigate(`/?room=${encodeURIComponent(selectedRoomTarget)}`);
   };
 
   return (
-    <div>
-      <h1 className="title" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <SearchIcon size={28} color="var(--primary)" /> 통합 검색
-      </h1>
-      
-      <div className="card" style={{marginBottom: '1rem'}}>
-        <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
-          <div style={{flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0 1rem'}}>
-            <SearchIcon size={18} color="var(--text-muted)" />
-            <input 
-              type="text" 
-              placeholder={`${getSearchTypeLabel(searchType).replace(' 검색', '')}을(를) 검색하세요...`}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              style={{flex: 1, padding: '0.75rem 0.5rem', border: 'none', outline: 'none', fontSize: '1rem'}}
-            />
-          </div>
-          <button 
-            className="btn" 
-            onClick={toggleSearchType}
-            style={{display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap'}}
-          >
-            <Filter size={18} /> {getSearchTypeLabel(searchType)}
-          </button>
+    <section className="page-shell search-page">
+      <header className="section-head">
+        <div>
+          <span className="section-kicker">통합 검색</span>
+          <h1>찾고 싶은 정보를 바로 확인</h1>
+        </div>
+      </header>
+
+      <div className="search-toolbar">
+        <label className="search-box">
+          <SearchIcon size={18} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="찾고 싶은 정보 검색"
+            aria-label="검색어"
+          />
+        </label>
+        <div className="segmented" role="tablist" aria-label="검색 유형">
+          {filters.map((filter) => (
+            <button
+              key={filter.value}
+              className={`seg-button ${searchType === filter.value ? 'active' : ''}`}
+              onClick={() => setSearchType(filter.value)}
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="card">
-        <h2 style={{fontSize: '1.2rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem'}}>
-          검색 결과 {!loading && `(${results.length}건)`}
-          {loading && <span style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginLeft: '10px'}}>검색 중...</span>}
-        </h2>
-        
-        {results.length === 0 && !loading ? (
-          <p style={{color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0'}}>"{query}"에 대한 검색 결과가 없습니다.</p>
-        ) : (
-          <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-            {results.map(item => (
-               <div key={item.id} className="card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', position: 'relative' }}>
-                <div 
-                  style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer'}}
-                  onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                >
-                  <div>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px'}}>
-                      <span className={`badge ${getBadgeColor(item.type)}`} style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}>
-                        {renderIcon(item.type)} {item.type}
-                      </span>
-                      <strong style={{fontSize: '1.15rem', color: 'var(--text-main)'}}>{item.title}</strong>
-                    </div>
-                    <p style={{marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem'}}>{item.subtitle}</p>
-                  </div>
-                </div>
-                {/* Expanded Details Content */}
-                {expandedId === item.id && (
-                  <div style={{
-                    marginTop: '1rem',
-                    padding: '1rem',
-                    backgroundColor: '#f8fafc',
-                    borderRadius: '8px',
-                    position: 'relative',
-                    border: '1px solid #e2e8f0'
-                  }}>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setExpandedId(null); }} 
-                      style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#64748b' }}
-                    >✕</button>
-                    <div style={{ fontWeight: '800', marginBottom: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.3rem', color: '#0ea5e9', fontSize: '0.85rem', paddingRight: '1.5rem' }}>
-                      📅 상세 시간표 일정
-                    </div>
-                    {item.details && item.details.length > 0 ? (
-                      <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.2rem 1rem', listStyle: 'none', padding: 0, margin: 0 }}>
-                        {item.details.map((detail, idx) => (
-                          <li key={idx} style={{ fontSize: '0.65rem', color: '#334155', padding: '0.35rem 0', borderBottom: '1px solid #f1f5f9', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.3 }}>{detail}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>등록된 정규 시간표 일정이 없습니다.</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="result-summary">
+        <strong>{loading ? '검색 중' : `${results.length}개 결과`}</strong>
+        <span>결과를 누르면 상세 정보가 먼저 열립니다.</span>
       </div>
-    </div>
+
+      <div className="list">
+        {!loading && results.length === 0 && (
+          <div className="empty-state">검색 결과가 없습니다.</div>
+        )}
+        {results.map((item) => {
+          const meta = getTypeMeta(item.type);
+          const Icon = meta.icon;
+          return (
+            <button key={item.id} className="list-row result-row" onClick={() => setSelectedResult(item)} type="button">
+              <span className={`type-chip ${meta.className}`}>
+                <Icon size={14} />
+                {meta.label}
+              </span>
+              <span className="result-main">
+                <strong>{item.title}</strong>
+                <small>{item.subtitle || item.location || '상세 정보 없음'}</small>
+              </span>
+              <ChevronRight size={18} />
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedResult && (
+        <div className="modal-backdrop" onClick={() => setSelectedResult(null)}>
+          <section className="app-modal detail-modal" onClick={(event) => event.stopPropagation()}>
+            <header className="app-modal-header">
+              <div>
+                <span className="section-kicker">상세 정보</span>
+                <h2>{selectedResult.title}</h2>
+              </div>
+              <button className="icon-control" onClick={() => setSelectedResult(null)} aria-label="닫기">×</button>
+            </header>
+            <p className="modal-copy">{selectedResult.subtitle || '등록된 요약 정보가 없습니다.'}</p>
+            <div className="detail-list">
+              {(selectedResult.details?.length ? selectedResult.details : ['등록된 세부 일정이 없습니다.']).map((detail, index) => (
+                <div key={`${selectedResult.id}-${index}`} className="detail-item">{detail}</div>
+              ))}
+            </div>
+            <div className="app-modal-actions">
+              <button className="button secondary" onClick={() => setSelectedResult(null)}>닫기</button>
+              <button className="button primary" onClick={openOnMap} disabled={!selectedRoomTarget}>
+                지도에서 보기
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </section>
   );
 }

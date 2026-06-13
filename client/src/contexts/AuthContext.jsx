@@ -1,11 +1,10 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { apiFetch } from '../lib/api';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,13 +15,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 유저 저장 (토큰은 쿠키로 서버에서 알아서 처리됨)
   const saveAuth = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  // 실제 구글 로그인 성공 시 호출
   const googleLogin = async (credentialResponse) => {
     try {
       const res = await apiFetch('/auth/google', {
@@ -31,13 +28,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ token: credentialResponse.credential }),
       });
       const data = await res.json();
-      if (res.ok) {
-        saveAuth(data.user);
-        return { success: true };
-      } else {
-        return { success: false, message: data.message };
+      if (!res.ok) {
+        return { success: false, message: data.message || '로그인에 실패했습니다.' };
       }
-    } catch (err) {
+      saveAuth(data.user);
+      return { success: true };
+    } catch {
       return { success: false, message: '구글 로그인 서버 오류가 발생했습니다.' };
     }
   };
@@ -49,14 +45,13 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await apiFetch('/auth/logout', { method: 'POST' });
-    } catch (e) {
-      console.error('Logout error', e);
+    } catch (err) {
+      console.error('Logout error', err);
     }
     setUser(null);
     localStorage.removeItem('user');
   };
 
-  // 프로필 수정
   const updateProfile = (updatedFields) => {
     const updatedUser = { ...user, ...updatedFields };
     setUser(updatedUser);
