@@ -1,144 +1,137 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Database, RefreshCw, Search, Shield, ShieldOff, Table2, Users } from 'lucide-react';
-import { apiFetch } from '../lib/api';
+import { useCallback, useEffect, useState } from 'react';
+import { RefreshCw, Search, Shield, ShieldOff, Users } from 'lucide-react';
+import TimetableManager from '../components/TimetableManager';
+import RoomManager from '../components/RoomManager';
 import { useAuth } from '../contexts/AuthContext';
+import { apiFetch } from '../lib/api';
 
 const tabs = [
-  { id: 'users', label: '사용자', icon: Users },
-  { id: 'rooms', label: '교실', icon: Database },
-  { id: 'timetables', label: '수업', icon: Table2 },
+  { id: 'USERS', label: '사용자 관리' },
+  { id: 'TIMETABLES', label: '수업 데이터 관리' },
+  { id: 'ROOMS', label: '교실 상태 관리' },
 ];
-
-const statusLabels = {
-  EMPTY: '빈 교실',
-  IN_USE: '사용 중',
-  CLASS: '수업 중',
-  NEEDS_APPROVAL: '승인 필요',
-  UNAVAILABLE: '사용 불가',
-  MAINTENANCE: '점검 중',
-};
-
-const dayLabels = ['', '월', '화', '수', '목', '금'];
 
 export default function Admin() {
   const { user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('USERS');
   const [users, setUsers] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [timetables, setTimetables] = useState([]);
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
+  const [updating, setUpdating] = useState(null);
 
-  const fetchAdminData = useCallback(async () => {
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3000);
+  };
+
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setError('');
+
     try {
-      const [userRes, roomRes, timetableRes] = await Promise.all([
-        apiFetch('/admin/users'),
-        apiFetch('/admin/rooms'),
-        apiFetch('/admin/timetables'),
-      ]);
-      setUsers(userRes.ok ? await userRes.json() : []);
-      setRooms(roomRes.ok ? await roomRes.json() : []);
-      setTimetables(timetableRes.ok ? await timetableRes.json() : []);
+      const res = await apiFetch('/admin/users');
+      if (!res.ok) throw new Error(`API error (${res.status})`);
+      setUsers(await res.json());
     } catch (err) {
-      console.error('Failed to fetch admin data', err);
+      console.error('Failed to fetch admin users', err);
       setUsers([]);
-      setRooms([]);
-      setTimetables([]);
+      setError('DB에서 사용자 데이터를 불러오지 못했습니다. 로그인 상태와 관리자 권한을 확인해주세요.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchAdminData();
-  }, [fetchAdminData]);
-
-  const lowerQuery = query.toLowerCase();
-
-  const filteredUsers = useMemo(() => users.filter((item) => (
-    item.name?.toLowerCase().includes(lowerQuery) ||
-    item.email?.toLowerCase().includes(lowerQuery) ||
-    item.role?.toLowerCase().includes(lowerQuery)
-  )), [lowerQuery, users]);
-
-  const filteredRooms = useMemo(() => rooms.filter((item) => (
-    item.name?.toLowerCase().includes(lowerQuery) ||
-    item.type?.toLowerCase().includes(lowerQuery) ||
-    item.description?.toLowerCase().includes(lowerQuery) ||
-    String(item.floor).includes(lowerQuery)
-  )), [lowerQuery, rooms]);
-
-  const filteredTimetables = useMemo(() => timetables.filter((item) => (
-    item.subject?.toLowerCase().includes(lowerQuery) ||
-    item.teacher_name?.toLowerCase().includes(lowerQuery) ||
-    item.room_name?.toLowerCase().includes(lowerQuery)
-  )), [lowerQuery, timetables]);
+    fetchUsers();
+  }, [fetchUsers]);
 
   const toggleRole = async (targetUser) => {
-    const role = targetUser.role === 'ADMIN' ? 'USER' : 'ADMIN';
-    const res = await apiFetch(`/admin/users/${targetUser.id}/role`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role }),
-    });
-    if (res.ok) {
-      setUsers((prev) => prev.map((item) => (item.id === targetUser.id ? { ...item, role } : item)));
+    const newRole = targetUser.role === 'ADMIN' ? 'USER' : 'ADMIN';
+    setUpdating(targetUser.id);
+
+    try {
+      const res = await apiFetch(`/admin/users/${targetUser.id}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) throw new Error(`API error (${res.status})`);
+
+      setUsers((prev) => prev.map((user) => (
+        user.id === targetUser.id ? { ...user, role: newRole } : user
+      )));
+      showToast(`${targetUser.name || targetUser.email} 권한을 ${newRole}로 변경했습니다.`);
+    } catch (err) {
+      console.error('Failed to update user role', err);
+      showToast('권한 변경에 실패했습니다.');
+    } finally {
+      setUpdating(null);
     }
   };
 
-  const updateRoomStatus = async (roomId, status) => {
-    const res = await apiFetch(`/admin/rooms/${roomId}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      setRooms((prev) => prev.map((room) => (room.id === roomId ? { ...room, status } : room)));
-    }
-  };
+  const filteredUsers = users.filter((user) => {
+    const q = query.toLowerCase();
+    return (
+      user.name?.toLowerCase().includes(q) ||
+      user.email?.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <section className="page-shell admin-page">
       <header className="section-head desktop-page-head">
         <div>
           <span className="section-kicker">Admin</span>
-          <h1>사이트 데이터 관리</h1>
+          <h1>관리자 페이지</h1>
         </div>
-        <button className="button secondary" onClick={fetchAdminData} type="button">
-          <RefreshCw size={16} />
-          새로고침
-        </button>
       </header>
 
-      <div className="admin-layout">
-        <aside className="admin-sidebar">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              className={`admin-tab ${activeTab === id ? 'active' : ''}`}
-              onClick={() => setActiveTab(id)}
-              type="button"
-            >
-              <Icon size={18} />
-              {label}
-            </button>
-          ))}
-        </aside>
+      <div className="admin-tabbar" role="tablist" aria-label="관리자 메뉴">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`admin-tab ${activeTab === tab.id ? 'active' : ''}`}
+            type="button"
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        <div className="admin-workspace">
-          <label className="search-box admin-search">
-            <Search size={18} />
+      {toast && <div className="toast-popup">{toast}</div>}
+
+      {activeTab === 'USERS' && (
+        <div className="card admin-manager-card">
+          <div className="admin-manager-head">
+            <h2>
+              <Users size={20} color="var(--primary)" />
+              사용자 정보 관리
+              <span>({filteredUsers.length}명)</span>
+            </h2>
+            <button onClick={fetchUsers} className="button secondary" type="button">
+              <RefreshCw size={14} />
+              새로고침
+            </button>
+          </div>
+
+          {error && <div className="admin-error-box">{error}</div>}
+
+          <label className="search-box admin-user-search">
+            <Search size={16} />
             <input
+              type="text"
+              placeholder="이름 또는 이메일로 검색..."
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="관리 데이터 검색"
             />
           </label>
 
-          {loading && <div className="empty-state">관리 데이터를 불러오는 중입니다.</div>}
-
-          {!loading && activeTab === 'users' && (
+          {loading ? (
+            <p className="admin-loading">불러오는 중...</p>
+          ) : (
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
@@ -150,16 +143,34 @@ export default function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((item) => {
-                    const isSelf = currentUser?.id === item.id || currentUser?.email === item.email;
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="table-empty-cell">
+                        표시할 사용자가 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                  {filteredUsers.map((user) => {
+                    const isSelf = currentUser?.id === user.id || currentUser?.email === user.email;
                     return (
-                      <tr key={item.id}>
-                        <td>{item.name || '-'}</td>
-                        <td>{item.email}</td>
-                        <td><span className={`role-chip ${item.role?.toLowerCase()}`}>{item.role}</span></td>
+                      <tr key={user.id}>
+                        <td>{user.name || '-'}</td>
+                        <td>{user.email}</td>
                         <td>
-                          <button className="icon-control" onClick={() => toggleRole(item)} disabled={isSelf} type="button">
-                            {item.role === 'ADMIN' ? <ShieldOff size={16} /> : <Shield size={16} />}
+                          <span className={`role-chip ${user.role?.toLowerCase()}`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => toggleRole(user)}
+                            disabled={updating === user.id || isSelf}
+                            title={isSelf ? '본인 권한은 여기서 변경할 수 없습니다.' : '권한 변경'}
+                            className="button secondary admin-role-button"
+                            type="button"
+                          >
+                            {user.role === 'ADMIN' ? <ShieldOff size={14} /> : <Shield size={14} />}
+                            {user.role === 'ADMIN' ? 'USER로' : 'ADMIN으로'}
                           </button>
                         </td>
                       </tr>
@@ -169,70 +180,11 @@ export default function Admin() {
               </table>
             </div>
           )}
-
-          {!loading && activeTab === 'rooms' && (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>교실</th>
-                    <th>층</th>
-                    <th>설명</th>
-                    <th>상태</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRooms.map((room) => (
-                    <tr key={room.id}>
-                      <td>{room.name}</td>
-                      <td>{room.floor}층</td>
-                      <td>{room.description || '-'}</td>
-                      <td>
-                        <select
-                          value={room.status || 'EMPTY'}
-                          onChange={(event) => updateRoomStatus(room.id, event.target.value)}
-                          className="table-select"
-                        >
-                          {Object.entries(statusLabels).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {!loading && activeTab === 'timetables' && (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>요일</th>
-                    <th>교시</th>
-                    <th>과목</th>
-                    <th>교사</th>
-                    <th>교실</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTimetables.map((item) => (
-                    <tr key={item.id}>
-                      <td>{dayLabels[item.day_of_week] || item.day_of_week}</td>
-                      <td>{item.period}교시</td>
-                      <td>{item.subject}</td>
-                      <td>{item.teacher_name || '-'}</td>
-                      <td>{item.room_name || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
-      </div>
+      )}
+
+      {activeTab === 'TIMETABLES' && <TimetableManager />}
+      {activeTab === 'ROOMS' && <RoomManager />}
     </section>
   );
 }
