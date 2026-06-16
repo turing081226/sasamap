@@ -12,14 +12,16 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleDevLogin = () => {
-    login({
-      id: 'local-dev-user',
-      name: '로컬 사용자',
-      email: 'local@sasa.hs.kr',
-      role: 'ADMIN',
-    });
-    navigate(from, { replace: true });
+  const handleDevLogin = async () => {
+    setLoading(true);
+    setError('');
+    const result = await login();
+    setLoading(false);
+    if (result.success) {
+      navigate(from, { replace: true });
+    } else {
+      setError(result.message || '개발 로그인에 실패했습니다.');
+    }
   };
 
   return (
