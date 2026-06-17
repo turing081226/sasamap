@@ -1221,6 +1221,7 @@ body.dark-mode .map-card {
   background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  overflow: hidden;
 }
 
 .schedule-bars.compact .schedule-bar {
@@ -1256,17 +1257,25 @@ button.schedule-bar {
 
 .period-cell {
   display: flex;
+  min-width: 0;
   flex-direction: column;
 }
 
 .period-cell strong {
+  overflow: hidden;
   font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .period-cell small,
 .schedule-main small {
+  display: block;
+  overflow: hidden;
   color: var(--text-muted);
   font-size: 0.73rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .schedule-main {
@@ -1797,7 +1806,8 @@ body.dark-mode .login-page {
   }
 
   .schedule-bars.compact {
-    height: 100%;
+    height: auto;
+    min-height: 100%;
   }
 
   .schedule-bar {
