@@ -374,7 +374,7 @@ export default function FindRoom() {
     ));
   }, [dbRooms, selectedRoom]);
 
-  const selectedRoomRestricted = ['CLASS', 'NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(selectedRoom?.status);
+  const selectedRoomRestricted = ['NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(selectedRoom?.status);
 
   const roomMatchesSelection = useCallback((item) => (
     selectedRoom && (
@@ -386,7 +386,7 @@ export default function FindRoom() {
 
   const availableReservationPeriods = useMemo(() => {
     const dbStatus = selectedDbRoom?.status || selectedRoom?.status;
-    if (!selectedRoom?.dbId || selectedRoomRestricted || ['CLASS', 'NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(dbStatus)) {
+    if (!selectedRoom?.dbId || selectedRoomRestricted || ['NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(dbStatus)) {
       return [];
     }
 

@@ -139,7 +139,7 @@ exports.occupyRoom = async (req, res) => {
     if (rooms.length === 0) {
       return res.status(404).json({ message: '교실을 찾을 수 없습니다.' });
     }
-    if (['CLASS', 'NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(rooms[0].status)) {
+    if (['NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(rooms[0].status)) {
       return res.status(400).json({ message: '예약할 수 없는 교실 상태입니다.' });
     }
 
