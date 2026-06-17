@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import { apiFetch } from '../lib/api';
@@ -90,10 +90,12 @@ export default function FindRoom() {
   const [dbRooms, setDbRooms] = useState([]);
   const [timetables, setTimetables] = useState([]);
   const [occupancies, setOccupancies] = useState([]);
+  const [myOccupancies, setMyOccupancies] = useState([]);
   const [currentPeriod, setCurrentPeriod] = useState(getCurrentPeriod());
   const [reservationDay, setReservationDay] = useState(getDefaultDay());
   const [reservationPeriod, setReservationPeriod] = useState(getCurrentPeriod() || 1);
   const [reserving, setReserving] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const scaleRef = useRef(1);
@@ -104,6 +106,15 @@ export default function FindRoom() {
 
   const currentFloorConfig = floorData[floor] || { viewBox: '0 0 500 320', rooms: [] };
   const currentDay = new Date().getDay();
+
+  const refreshOccupancies = useCallback(async () => {
+    const [allRes, mineRes] = await Promise.all([
+      apiFetch('/rooms/occupancies'),
+      apiFetch('/mypage/occupancy'),
+    ]);
+    setOccupancies(allRes.ok ? await allRes.json() : []);
+    setMyOccupancies(mineRes.ok ? await mineRes.json() : []);
+  }, []);
 
   const applyTransform = (scale, offset) => {
     scaleRef.current = scale;
@@ -158,14 +169,13 @@ export default function FindRoom() {
   useEffect(() => {
     const fetchMapData = async () => {
       try {
-        const [roomRes, timetableRes, occupancyRes] = await Promise.all([
+        const [roomRes, timetableRes] = await Promise.all([
           apiFetch('/rooms'),
           apiFetch('/rooms/timetables'),
-          apiFetch('/rooms/occupancies'),
         ]);
         setDbRooms(roomRes.ok ? await roomRes.json() : []);
         setTimetables(timetableRes.ok ? await timetableRes.json() : []);
-        setOccupancies(occupancyRes.ok ? await occupancyRes.json() : []);
+        await refreshOccupancies();
       } catch (err) {
         console.error('Failed to fetch map data', err);
       }
@@ -174,13 +184,10 @@ export default function FindRoom() {
     fetchMapData();
     const timer = setInterval(() => {
       setCurrentPeriod(getCurrentPeriod());
-      apiFetch('/rooms/occupancies')
-        .then((res) => (res.ok ? res.json() : []))
-        .then(setOccupancies)
-        .catch(() => {});
+      refreshOccupancies().catch(() => {});
     }, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [refreshOccupancies]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -360,9 +367,58 @@ export default function FindRoom() {
     }
   };
 
+  const selectedDbRoom = useMemo(() => {
+    if (!selectedRoom) return null;
+    return dbRooms.find((candidate) => (
+      sameRoom(candidate.name, selectedRoom.name) || sameRoom(candidate.name, selectedRoom.id)
+    ));
+  }, [dbRooms, selectedRoom]);
+
+  const selectedRoomRestricted = ['CLASS', 'NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(selectedRoom?.status);
+
+  const roomMatchesSelection = useCallback((item) => (
+    selectedRoom && (
+      sameRoom(item.room_name, selectedRoom.name) ||
+      sameRoom(item.room_name, selectedRoom.id) ||
+      (selectedRoom.dbId && String(item.room_id) === String(selectedRoom.dbId))
+    )
+  ), [selectedRoom]);
+
+  const availableReservationPeriods = useMemo(() => {
+    const dbStatus = selectedDbRoom?.status || selectedRoom?.status;
+    if (!selectedRoom?.dbId || selectedRoomRestricted || ['CLASS', 'NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(dbStatus)) {
+      return [];
+    }
+
+    return PERIODS.filter((period) => {
+      const hasClass = timetables.some((item) => (
+        item.day_of_week === reservationDay &&
+        item.period === period.id &&
+        roomMatchesSelection(item)
+      ));
+      return !hasClass;
+    });
+  }, [reservationDay, roomMatchesSelection, selectedDbRoom, selectedRoom, selectedRoomRestricted, timetables]);
+
+  const selectedRoomMyReservations = useMemo(() => (
+    myOccupancies.filter((item) => roomMatchesSelection(item))
+  ), [myOccupancies, roomMatchesSelection]);
+
+  useEffect(() => {
+    if (availableReservationPeriods.length === 0) return;
+    const currentAvailable = availableReservationPeriods.some((period) => period.id === reservationPeriod);
+    if (!currentAvailable) {
+      setReservationPeriod(availableReservationPeriods[0].id);
+    }
+  }, [availableReservationPeriods, reservationPeriod]);
+
   const reserveRoom = async () => {
     if (!selectedRoom?.dbId) {
       showToast('error', 'DB에 연결된 교실만 예약할 수 있습니다.');
+      return;
+    }
+    if (!availableReservationPeriods.some((period) => period.id === reservationPeriod)) {
+      showToast('error', '예약 가능한 빈 교시만 선택할 수 있습니다.');
       return;
     }
 
@@ -380,10 +436,26 @@ export default function FindRoom() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || '예약에 실패했습니다.');
       showToast('success', `${selectedRoom.name} 예약을 신청했습니다.`);
+      await refreshOccupancies();
     } catch (err) {
       showToast('error', err.message);
     } finally {
       setReserving(false);
+    }
+  };
+
+  const cancelReservation = async (reservationId) => {
+    setCancellingId(reservationId);
+    try {
+      const res = await apiFetch(`/mypage/occupancy/${reservationId}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || '예약 취소에 실패했습니다.');
+      showToast('success', '예약을 취소했습니다.');
+      await refreshOccupancies();
+    } catch (err) {
+      showToast('error', err.message);
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -485,24 +557,55 @@ export default function FindRoom() {
               </span>
             </div>
             <p>{selectedRoom.current || '등록된 설명 없음'}</p>
-            <div className="reservation-panel">
-              <strong>공강실 예약</strong>
-              <div className="reservation-controls">
-                <select value={reservationDay} onChange={(event) => setReservationDay(Number(event.target.value))}>
-                  {WEEK_DAYS.map((day) => (
-                    <option key={day.id} value={day.id}>{day.label}</option>
-                  ))}
-                </select>
-                <select value={reservationPeriod} onChange={(event) => setReservationPeriod(Number(event.target.value))}>
-                  {PERIODS.map((period) => (
-                    <option key={period.id} value={period.id}>{period.label}</option>
-                  ))}
-                </select>
-                <button className="button primary thin-button" onClick={reserveRoom} disabled={reserving || !selectedRoom.dbId} type="button">
-                  사용하기
-                </button>
+            {!selectedRoomRestricted && selectedRoom.dbId && (
+              <div className="reservation-panel">
+                <strong>공강실 예약</strong>
+                <div className="reservation-controls">
+                  <select value={reservationDay} onChange={(event) => setReservationDay(Number(event.target.value))}>
+                    {WEEK_DAYS.map((day) => (
+                      <option key={day.id} value={day.id}>{day.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={availableReservationPeriods.length ? reservationPeriod : ''}
+                    onChange={(event) => setReservationPeriod(Number(event.target.value))}
+                    disabled={availableReservationPeriods.length === 0}
+                  >
+                    {availableReservationPeriods.map((period) => (
+                      <option key={period.id} value={period.id}>{period.label}</option>
+                    ))}
+                  </select>
+                  <button
+                    className="button primary thin-button"
+                    onClick={reserveRoom}
+                    disabled={reserving || availableReservationPeriods.length === 0}
+                    type="button"
+                  >
+                    사용하기
+                  </button>
+                </div>
+                {availableReservationPeriods.length === 0 && (
+                  <div className="reservation-empty">선택한 요일에 예약 가능한 빈 교시가 없습니다.</div>
+                )}
+                {selectedRoomMyReservations.length > 0 && (
+                  <div className="reservation-list">
+                    {selectedRoomMyReservations.map((item) => (
+                      <div key={item.id} className="reservation-item">
+                        <span>{WEEK_DAYS.find((day) => day.id === item.day_of_week)?.label || item.day_of_week} · {item.period}교시</span>
+                        <button
+                          className="reservation-cancel"
+                          onClick={() => cancelReservation(item.id)}
+                          disabled={cancellingId === item.id}
+                          type="button"
+                        >
+                          취소
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </>
         ) : (
           <p className="muted">교실을 선택하면 설명과 예약 기능이 표시됩니다.</p>

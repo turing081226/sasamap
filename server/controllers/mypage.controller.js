@@ -132,6 +132,17 @@ exports.occupyRoom = async (req, res) => {
     const dayVal = parseInt(day_of_week, 10);
     const periodVal = parseInt(period, 10);
 
+    const [rooms] = await pool.query(
+      'SELECT status FROM rooms WHERE id = ?',
+      [roomIdVal]
+    );
+    if (rooms.length === 0) {
+      return res.status(404).json({ message: '교실을 찾을 수 없습니다.' });
+    }
+    if (['CLASS', 'NEEDS_APPROVAL', 'UNAVAILABLE', 'MAINTENANCE'].includes(rooms[0].status)) {
+      return res.status(400).json({ message: '예약할 수 없는 교실 상태입니다.' });
+    }
+
     // 1. Check if there is a regular class at that time in the room
     const [timetables] = await pool.query(
       'SELECT * FROM timetables WHERE room_id = ? AND day_of_week = ? AND period = ?',

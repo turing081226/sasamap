@@ -1068,6 +1068,51 @@ body.dark-mode .map-card {
   outline: 0;
 }
 
+.reservation-empty {
+  padding: 0.45rem 0.55rem;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  border-radius: 8px;
+  font-size: 0.78rem;
+}
+
+.reservation-list {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.reservation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 30px;
+  padding: 0.25rem 0.35rem 0.25rem 0.55rem;
+  color: var(--text-main);
+  background: var(--surface-soft);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.reservation-cancel {
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 0 0.5rem;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 9%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--danger) 24%, var(--border-color));
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.reservation-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .thin-button {
   min-height: 32px;
   padding-inline: 0.75rem;
@@ -1729,8 +1774,30 @@ body.dark-mode .login-page {
     padding-top: 0.35rem;
   }
 
+  .reservation-item {
+    min-height: 28px;
+    font-size: 0.76rem;
+  }
+
   .timetable-scroll {
-    max-height: calc(100dvh - 250px);
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .timetable-page {
+    height: calc(100dvh - 58px - 7.35rem);
+    min-height: 0;
+    gap: 0.5rem;
+  }
+
+  .timetable-page .section-head,
+  .timetable-page .day-selector {
+    flex: 0 0 auto;
+  }
+
+  .schedule-bars.compact {
+    height: 100%;
   }
 
   .schedule-bar {
@@ -1741,12 +1808,14 @@ body.dark-mode .login-page {
   }
 
   .schedule-bars.compact .schedule-bar {
-    min-height: 42px;
-    padding: 0.34rem 0.45rem;
+    flex: 1 1 0;
+    min-height: 34px;
+    padding: clamp(0.22rem, 0.9vh, 0.34rem) 0.45rem;
   }
 
   .schedule-bars.compact .schedule-bar.lunch {
-    min-height: 32px;
+    flex: 0.72 1 0;
+    min-height: 28px;
   }
 
   .period-cell small {
