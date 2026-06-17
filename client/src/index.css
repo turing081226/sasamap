@@ -1257,6 +1257,7 @@ button.schedule-bar {
 
 .period-cell {
   display: flex;
+  justify-content: center;
   min-width: 0;
   flex-direction: column;
 }
@@ -1264,6 +1265,7 @@ button.schedule-bar {
 .period-cell strong {
   overflow: hidden;
   font-size: 0.82rem;
+  line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1274,6 +1276,7 @@ button.schedule-bar {
   overflow: hidden;
   color: var(--text-muted);
   font-size: 0.73rem;
+  line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1281,12 +1284,14 @@ button.schedule-bar {
 .schedule-main {
   position: relative;
   display: flex;
+  justify-content: center;
   min-width: 0;
   flex-direction: column;
 }
 
 .schedule-main strong {
   overflow: hidden;
+  line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1295,11 +1300,12 @@ button.schedule-bar {
   display: none;
   position: absolute;
   left: -0.7rem;
-  top: 0.35rem;
+  top: 50%;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--success);
+  transform: translateY(-50%);
 }
 
 .schedule-bar.current .now-dot {
